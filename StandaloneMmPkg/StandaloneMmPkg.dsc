@@ -100,6 +100,13 @@
   #
   StandaloneMmPkg/Core/StandaloneMmCore.inf
 
+  # MU_CHANGE Starts
+  #
+  # Libraries
+  #
+  StandaloneMmPkg/Library/PeiStandaloneMmHobProductionLib/PeiStandaloneMmHobProductionLib.inf
+  # MU_CHANGE Ends
+
 [Components.AARCH64]
   StandaloneMmPkg/Drivers/StandaloneMmCpu/AArch64/StandaloneMmCpu.inf
 
