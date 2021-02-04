@@ -6,7 +6,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#include <PiSmm.h>
+#include <PiMm.h>
 #include <Library/SmmCpuFeaturesLib.h>
 #include <Library/BaseLib.h>
 #include <Library/MtrrLib.h>
@@ -15,6 +15,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/DebugLib.h>
 #include <Register/Intel/Cpuid.h>
 #include <Register/Intel/SmramSaveStateMap.h>
+#include "CpuFeaturesLib.h"
 
 //
 // Machine Specific Registers (MSRs)
@@ -72,19 +73,14 @@ BOOLEAN  mNeedConfigureMtrrs = TRUE;
 BOOLEAN  *mSmrrEnabled;
 
 /**
-  The constructor function
+  Performs library initialization.
 
-  @param[in]  ImageHandle  The firmware allocated handle for the EFI image.
-  @param[in]  SystemTable  A pointer to the EFI System Table.
-
-  @retval EFI_SUCCESS      The constructor always returns EFI_SUCCESS.
+  @retval EFI_SUCCESS      This function always returns success.
 
 **/
 EFI_STATUS
-EFIAPI
-SmmCpuFeaturesLibConstructor (
-  IN EFI_HANDLE        ImageHandle,
-  IN EFI_SYSTEM_TABLE  *SystemTable
+CpuFeaturesLibInitialization (
+  VOID
   )
 {
   UINT32  RegEax;
@@ -169,7 +165,7 @@ SmmCpuFeaturesLibConstructor (
   //
   // Allocate array for state of SMRR enable on all CPUs
   //
-  mSmrrEnabled = (BOOLEAN *)AllocatePool (sizeof (BOOLEAN) * PcdGet32 (PcdCpuMaxLogicalProcessorNumber));
+  mSmrrEnabled = (BOOLEAN *)AllocatePool (sizeof (BOOLEAN) * GetCpuMaxLogicalProcessorNumber ());
   ASSERT (mSmrrEnabled != NULL);
 
   return EFI_SUCCESS;

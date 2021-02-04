@@ -1,5 +1,5 @@
 ## @file
-#  The CPU specific programming for PiSmmCpuDxeSmm module.
+#  Standalone MM CPU specific programming.
 #
 #  Copyright (c) 2009 - 2016, Intel Corporation. All rights reserved.<BR>
 #  SPDX-License-Identifier: BSD-2-Clause-Patent
@@ -8,17 +8,18 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = SmmCpuFeaturesLib
+  BASE_NAME                      = StandaloneMmCpuFeaturesLib
   MODULE_UNI_FILE                = SmmCpuFeaturesLib.uni
   FILE_GUID                      = FC3DC10D-D271-422a-AFF3-CBCF70344431
-  MODULE_TYPE                    = DXE_SMM_DRIVER
+  MODULE_TYPE                    = MM_STANDALONE
   VERSION_STRING                 = 1.0
+  PI_SPECIFICATION_VERSION       = 0x00010032
   LIBRARY_CLASS                  = SmmCpuFeaturesLib
-  CONSTRUCTOR                    = SmmCpuFeaturesLibConstructor
+  CONSTRUCTOR                    = StandaloneMmCpuFeaturesLibConstructor
 
 [Sources]
   CpuFeaturesLib.h
-  TraditionalMmCpuFeaturesLib.c
+  StandaloneMmCpuFeaturesLib.c
   SmmCpuFeaturesLib.c
   SmmCpuFeaturesLibNoStm.c
 
@@ -32,5 +33,5 @@
   MemoryAllocationLib
   DebugLib
 
-[Pcd]
+[FixedPcd]
   gUefiCpuPkgTokenSpaceGuid.PcdCpuMaxLogicalProcessorNumber        ## SOMETIMES_CONSUMES
