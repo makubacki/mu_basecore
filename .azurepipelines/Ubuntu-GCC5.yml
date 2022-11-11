@@ -28,4 +28,4 @@ jobs:
               pip install lcov_cobertura pycobertura
       displayName: Install Windows Resource Compiler for Linux & Code Coverage Tools
     tool_chain_tag: $(tool_chain_tag)
-    vm_image: $(vm_image)
+    vm_image: ubuntu-22.04

@@ -26,4 +26,4 @@ jobs:
       - script: sudo apt-get install mingw-w64
         displayName: Install Windows Resource Compiler for Linux
     tool_chain_tag: $(tool_chain_tag)
-    vm_image: $(vm_image)
+    vm_image: ubuntu-22.04
