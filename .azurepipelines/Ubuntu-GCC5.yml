@@ -9,9 +9,9 @@ resources:
   repositories:
     - repository: mu_devops
       type: github
-      endpoint: microsoft
-      name: microsoft/mu_devops
-      ref: main
+      endpoint: makubacki
+      name: makubacki/mu_devops
+      ref: move_to_py_3_11
 
 variables:
 - group: architectures-arm-64-x86-64
