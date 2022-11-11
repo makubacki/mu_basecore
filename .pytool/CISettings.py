@@ -130,7 +130,7 @@ class Settings(CiBuildSettingsManager, UpdateSettingsManager, SetupSettingsManag
     def GetActiveScopes(self):
         ''' return tuple containing scopes that should be active for this process '''
         if self.ActualScopes is None:
-            scopes = ("cibuild", "edk2-build", "host-based-test")
+            scopes = ("cibuild", "edk2-build", "host-based-test", "codeql-build", "codeql-analyze", "codeql-ext-dep")
 
             self.ActualToolChainTag = shell_environment.GetBuildVars().GetValue("TOOL_CHAIN_TAG", "")
 
