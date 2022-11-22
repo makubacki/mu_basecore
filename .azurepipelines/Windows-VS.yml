@@ -9,9 +9,9 @@ resources:
   repositories:
     - repository: mu_devops
       type: github
-      endpoint: microsoft
-      name: microsoft/mu_devops
-      ref: main
+      endpoint: makubacki
+      name: makubacki/mu_devops
+      ref: install_wheel_setuptools_in_pip_install
 
 variables:
 - group: architectures-x86-64
