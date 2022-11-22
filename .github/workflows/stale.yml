@@ -11,10 +11,11 @@ name: Check for Stale Issues and Pull Requests
 
 on:
   schedule:
-  # At 23:35 on every day-of-week from Sunday through Saturday
-  # https://crontab.guru/#35_23_*_*_0-6
-  - cron: '35 23 * * 0-6
+    # At 23:35 on every day-of-week from Sunday through Saturday
+    # https://crontab.guru/#35_23_*_*_0-6
+    - cron: '35 23 * * 0-6'
+  workflow_dispatch:
 
 jobs:
-  stale-check:
-    uses: microsoft/mu_devops/.github/workflows/Stale.yml@main
+  check:
+    uses: makubacki/mu_devops/.github/workflows/Stale.yml@add_common_stale_workflow_testing
