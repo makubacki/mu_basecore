@@ -1,0 +1,23 @@
+# This is a reusable workflow that contains common logic for cherry-picking changes
+# in a PR based on a comment to cherry-pick.
+#
+# In Project Mu, this is useful for easily cherry-picking changes back to older release
+# branches that also need the changes.
+#
+# The changes will not be cherry-picked until the PR is squashed and merged.
+#
+# The current set of restrictions will be defined in the reusable workflow file in Mu DevOps.
+#
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+
+name: Cherry Pick On Comment
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  cherry-pick:
+    uses: makubacki/mu_devops/.github/workflows/CommentCherryPick.yml@add_common_cherry_pick_bot_workflow
