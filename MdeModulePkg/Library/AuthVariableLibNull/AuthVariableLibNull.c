@@ -66,6 +66,7 @@ AuthVariableLibProcessVariable (
   IN UINT32    Attributes
   )
 {
+  // Test comment to have a change in a file
   ASSERT (FALSE);
   return EFI_UNSUPPORTED;
 }
