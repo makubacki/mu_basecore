@@ -36,8 +36,10 @@ body:
       description: Indicate if you are going to make this change or requesting someone else make it.
       multiple: false
       options:
-        - I will
-        - Someone else needs to
+        - I will make the change
+        - Someone else needs to make the change
+    validations:
+      required: true
 
   - type: textarea
     id: anything_else

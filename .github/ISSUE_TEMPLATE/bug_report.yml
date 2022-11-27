@@ -101,6 +101,8 @@ body:
         - Low
         - Medium
         - High
+    validations:
+      required: true
 
   - type: dropdown
     id: fix_owner
@@ -111,6 +113,8 @@ body:
       options:
         - I will fix it
         - Someone else needs to fix it
+    validations:
+      required: true
 
   - type: textarea
     id: anything_else

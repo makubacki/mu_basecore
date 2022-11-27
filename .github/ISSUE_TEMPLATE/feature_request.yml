@@ -69,6 +69,8 @@ body:
         - Low
         - Medium
         - High
+    validations:
+      required: true
 
   - type: dropdown
     id: request_owner
@@ -77,8 +79,10 @@ body:
       description: Indicate if you are going to do the work to close this feature request.
       multiple: false
       options:
-        - I will
-        - Someone else needs to
+        - I will implement the feature
+        - Someone else needs to implement the feature
+    validations:
+      required: true
 
   - type: textarea
     id: anything_else
