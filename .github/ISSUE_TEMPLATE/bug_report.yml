@@ -81,13 +81,13 @@ body:
     attributes:
       value: |
         **Urgency Key**
-        - **Low**
+        - 🟢 **Low**
           - A minor change with little to no important functional impact
           - It is not important to fix this in a specific time frame
-        - **Medium**
+        - 🟡 **Medium**
           - An important change with a functional impact
           - Will be prioritized above *low* issues in the normal course of development
-        - **High**
+        - 🔥 **High**
           - A critical change that has a significant functional impact
           - Must be fixed immediately
 

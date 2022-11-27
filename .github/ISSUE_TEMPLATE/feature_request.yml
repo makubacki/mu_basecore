@@ -49,13 +49,13 @@ body:
     attributes:
       value: |
         **Urgency Key**
-        - **Low**
+        - 🟢 **Low**
           - A minor enhancement
           - It is not important to address this request in a specific time frame
-        - **Medium**
+        - 🟡 **Medium**
           - An important enhancement
           - Will be prioritized above *low* requests in the normal course of development
-        - **High**
+        - 🔥 **High**
           - A critical enhancement with significant value
           - Should be prioritized above *low* and *medium* requests
 
