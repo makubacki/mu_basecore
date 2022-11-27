@@ -11,7 +11,7 @@
 #
 
 name: 🐛 Bug Report
-about: File a bug report
+description: File a bug report
 title: "[Bug]: <title>"
 labels: ["type:bug", "state:needs-triage"]
 

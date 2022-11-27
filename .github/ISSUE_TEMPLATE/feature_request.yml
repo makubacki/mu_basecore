@@ -11,7 +11,7 @@
 #
 
 name: 🚀 Feature Request
-about: Request a feature change
+description: Request a feature change
 title: "[Feature]: <title>"
 labels: ["type:feature-request", "state:needs-triage"]
 

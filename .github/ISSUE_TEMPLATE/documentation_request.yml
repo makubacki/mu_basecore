@@ -11,7 +11,7 @@
 #
 
 name: 📖 Documentation Request
-about: Request a documentation change
+description: Request a documentation change
 title: "[Documentation]: <title>"
 labels: ["type:documentation", "state:needs-triage"]
 
