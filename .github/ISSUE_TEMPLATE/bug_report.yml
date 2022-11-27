@@ -98,9 +98,9 @@ body:
       description: How urgent is it to fix this bug?
       multiple: false
       options:
-        - label: Low
-        - label: Medium
-        - label: High
+        - Low
+        - Medium
+        - High
 
   - type: dropdown
     id: fix_owner
@@ -109,8 +109,8 @@ body:
       description: Indicate if you are going to fix this or requesting someone else fix it.
       multiple: false
       options:
-        - label: I will fix it
-        - label: Someone else needs to fix it
+        - I will fix it
+        - Someone else needs to fix it
 
   - type: textarea
     id: anything_else
