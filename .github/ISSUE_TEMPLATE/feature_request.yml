@@ -45,19 +45,19 @@ body:
     validations:
       required: false
 
-    - type: markdown
-      attributes:
-        value: |
-          **Urgency Key**
-          - **Low**
-            - A minor enhancement
-            - It is not important to address this request in a specific time frame
-          - **Medium**
-            - An important enhancement
-            - Will be prioritized above *low* requests in the normal course of development
-          - **High**
-            - A critical enhancement with significant value
-            - Should be prioritized above *low* and *medium* requests
+  - type: markdown
+    attributes:
+      value: |
+        **Urgency Key**
+        - **Low**
+          - A minor enhancement
+          - It is not important to address this request in a specific time frame
+        - **Medium**
+          - An important enhancement
+          - Will be prioritized above *low* requests in the normal course of development
+        - **High**
+          - A critical enhancement with significant value
+          - Should be prioritized above *low* and *medium* requests
 
   - type: dropdown
     id: urgency
