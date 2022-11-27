@@ -77,6 +77,19 @@ body:
     validations:
       required: true
 
+  - type: textarea
+    id: version_info
+    attributes:
+      label: Version Information
+      description: What version of this repo reproduces the problem?
+      placeholder: |
+        Commit: <SHA>
+        -or-
+        Tag: <Tag>
+      render: text
+    validations:
+      required: true
+
   - type: markdown
     attributes:
       value: |
