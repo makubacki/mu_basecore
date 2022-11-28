@@ -21,7 +21,9 @@ body:
       value: |
         👋 Thanks for taking the time to fill out this bug report!
          <!-- Do not modify the below line unless intentionally changing the version: -->
-         <!-- issue_labeler_regex_version=1 -->
+         <!--
+         issue_labeler_regex_version=1
+         -->
 
   - type: checkboxes
     attributes:
