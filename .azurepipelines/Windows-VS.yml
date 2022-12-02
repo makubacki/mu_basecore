@@ -18,9 +18,13 @@ resources:
   repositories:
     - repository: mu_devops
       type: github
-      endpoint: microsoft
-      name: microsoft/mu_devops
-      ref: main
+      endpoint: makubacki
+      name: makubacki/mu_devops
+      ref: test_repo_res_trigger
+      trigger:
+        branches:
+          include:
+            - '*'
 
 variables:
 - group: architectures-x86-64
