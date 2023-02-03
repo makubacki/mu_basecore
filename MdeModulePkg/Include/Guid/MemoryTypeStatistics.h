@@ -1,16 +1,16 @@
 /** @file
+  GUID and structure for storing memory type statistics.
+  Used for PEI and DXE memory buckets.
 
-GUID and structure for storing memory type statistics.
-Used for PEI and DXE memory buckets.
+  Copyright (C) Microsoft Corporation. All rights reserved.
+  SPDX-License-Identifier: BSD-2-Clause-Patent
 
-Copyright (C) Microsoft Corporation. All rights reserved.
-SPDX-License-Identifier: BSD-2-Clause-Patent
-
+  MU_CHANGE [WHOLE FILE] - Add MemoryBucketLib to MdeModulePkg
 
 **/
 
-#ifndef __MEMORY_TYPE_STATISTICS_GUID_H__
-#define __MEMORY_TYPE_STATISTICS_GUID_H__
+#ifndef MEMORY_TYPE_STATISTICS_GUID_H_
+#define MEMORY_TYPE_STATISTICS_GUID_H_
 
 #define MEMORY_TYPE_STATISTICS_GUID \
   { 0x6146C0D6, 0x8E30, 0x4DC2, { 0xA9, 0xCB, 0x5D, 0x85, 0x10, 0xC4, 0x8B, 0x39 }}

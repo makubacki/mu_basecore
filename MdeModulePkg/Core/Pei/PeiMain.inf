@@ -62,7 +62,7 @@
   PeiCoreEntryPoint
   DebugLib
   MemoryAllocationLib
-  MemoryBucketLib                      ## MU_CHANGE - added runtime memory buckets in pei
+  MemoryBucketLib                      ## MU_CHANGE - Add MemoryBucketLib to MdeModulePkg
   CacheMaintenanceLib
   PeCoffLib
   PeiServicesTablePointerLib
@@ -82,7 +82,7 @@
   gEdkiiMigratedFvInfoGuid                      ## SOMETIMES_PRODUCES     ## HOB
   gEfiFirmwarePerformanceGuid # MS_CHANGE_161871 - needed to build SEC perf HOB
   gEfiDelayedDispatchTableGuid   # MSCHANGE
-  gMemoryBucketInformationGuid  # MU_CHANGE
+  gMemoryBucketInformationHobGuid  # MU_CHANGE - Add MemoryBucketLib to MdeModulePkg
 
 [Ppis]
   gEfiPeiStatusCodePpiGuid                      ## SOMETIMES_CONSUMES # PeiReportStatusService is not ready if this PPI doesn't exist

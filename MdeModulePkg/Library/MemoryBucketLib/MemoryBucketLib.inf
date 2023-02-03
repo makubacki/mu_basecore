@@ -1,5 +1,7 @@
 ## @file
-# Library that creates and manages Runtime memory buckets for use during PEI
+# Library that creates and manages runtime memory buckets for use during PEI
+#
+# MU_CHANGE [WHOLE FILE] - Add MemoryBucketLib to MdeModulePkg
 #
 # Copyright (c) Microsoft Corporation.
 # SPDX-License-Identifier: BSD-2-Clause-Patent

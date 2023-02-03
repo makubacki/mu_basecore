@@ -116,7 +116,6 @@
   ExceptionPersistenceLib|MdeModulePkg/Library/BaseExceptionPersistenceLibNull/BaseExceptionPersistenceLibNull.inf # MU_CHANGE
 
   MmuLib|MdePkg/Library/BaseMmuLibNull/BaseMmuLibNull.inf       ## MU_CHANGE
-  MemoryBucketLib|MdeModulePkg/Library/MemoryBucketLib/MemoryBucketLib.inf  ## MU_CHANGE
 
 # MU_CHANGE START Include MemoryProtectionHobLib
 [LibraryClasses.common.DXE_DRIVER, LibraryClasses.common.DXE_CORE, LibraryClasses.common.UEFI_APPLICATION]
@@ -149,6 +148,7 @@
 [LibraryClasses.common.PEI_CORE]
   HobLib|MdePkg/Library/PeiHobLib/PeiHobLib.inf
   MemoryAllocationLib|MdePkg/Library/PeiMemoryAllocationLib/PeiMemoryAllocationLib.inf
+  MemoryBucketLib|MdeModulePkg/Library/MemoryBucketLib/MemoryBucketLib.inf  # MU_CHANGE - Add MemoryBucketLib to MdeModulePkg
 
 [LibraryClasses.common.PEIM]
   HobLib|MdePkg/Library/PeiHobLib/PeiHobLib.inf
@@ -533,7 +533,7 @@
   MdeModulePkg/Library/PcdDatabaseLoaderLib/Dxe/PcdDatabaseLoaderLibDxe.inf   # MU_CHANGE
   MdeModulePkg/Library/MemoryBinOverrideLibNull/MemoryBinOverrideLibNull.inf  # MU_CHANGE
 
-  MdeModulePkg/Library/MemoryBucketLib/MemoryBucketLib.inf  ## MU_CHANGE
+  MdeModulePkg/Library/MemoryBucketLib/MemoryBucketLib.inf  # MU_CHANGE - Add MemoryBucketLib to MdeModulePkg
 
 # MU_CHANGE START
 !if $(TOOLCHAIN) != VS2017 and $(TOOLCHAIN) != VS2019

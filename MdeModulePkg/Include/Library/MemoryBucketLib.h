@@ -1,16 +1,17 @@
 /** @file
+  Library for defining PEI memory buckets. This keeps track of the
+  different buckets and the data for the associated HOB.
+  For internal use only.
 
-Library for defining PEI memory buckets. This keeps track of the
-different buckets and the data for the associated HOB.
-For internal use only.
+  Copyright (C) Microsoft Corporation. All rights reserved.
+  SPDX-License-Identifier: BSD-2-Clause-Patent
 
-Copyright (C) Microsoft Corporation. All rights reserved.
-SPDX-License-Identifier: BSD-2-Clause-Patent
+  MU_CHANGE [WHOLE FILE] - Add MemoryBucketLib to MdeModulePkg
 
 **/
 
-#ifndef __MEMORY_BUCKET_LIB_H__
-#define __MEMORY_BUCKET_LIB_H__
+#ifndef MEMORY_BUCKET_LIB_H_
+#define MEMORY_BUCKET_LIB_H_
 
 #include <Uefi.h>
 #include <Base.h>

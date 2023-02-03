@@ -589,16 +589,20 @@ PeiAllocatePages (
   OUT      EFI_PHYSICAL_ADDRESS  *Memory
   )
 {
-  EFI_STATUS                     Status;
-  PEI_CORE_INSTANCE              *PrivateData;
-  EFI_PEI_HOB_POINTERS           Hob;
-  EFI_PHYSICAL_ADDRESS           *FreeMemoryTop;
-  EFI_PHYSICAL_ADDRESS           *FreeMemoryBottom;
-  UINTN                          RemainingPages;
-  UINTN                          Granularity;
-  UINTN                          Padding;
+  EFI_STATUS            Status;
+  PEI_CORE_INSTANCE     *PrivateData;
+  EFI_PEI_HOB_POINTERS  Hob;
+  EFI_PHYSICAL_ADDRESS  *FreeMemoryTop;
+  EFI_PHYSICAL_ADDRESS  *FreeMemoryBottom;
+  UINTN                 RemainingPages;
+  UINTN                 Granularity;
+  UINTN                 Padding;
+
+  // MU_CHANGE [BEGIN] - Add MemoryBucketLib to MdeModulePkg
   EFI_HOB_GUID_TYPE              *MemBucketHob;
   PEI_MEMORY_BUCKET_INFORMATION  RuntimeBucketHob;
+
+  // MU_CHANGE [END] - Add MemoryBucketLib to MdeModulePkg
 
   if ((MemoryType != EfiLoaderCode) &&
       (MemoryType != EfiLoaderData) &&
@@ -652,8 +656,8 @@ PeiAllocatePages (
     FreeMemoryBottom = &(Hob.HandoffInformationTable->EfiFreeMemoryBottom);
   }
 
-  // MU_CHANGE START
-  MemBucketHob = GetFirstGuidHob (&gMemoryBucketInformationGuid);
+  // MU_CHANGE [BEGIN] - Add MemoryBucketLib to MdeModulePkg
+  MemBucketHob = GetFirstGuidHob (&gMemoryBucketInformationHobGuid);
   SyncMemoryBuckets (MemBucketHob);
 
   // Check if we're using the memory buckets
@@ -672,7 +676,7 @@ PeiAllocatePages (
     *FreeMemoryTop = GetBottomOfBucketsAddress ();
   }
 
-  // MU_CHANGE END
+  // MU_CHANGE [END] - Add MemoryBucketLib to MdeModulePkg
 
   //
   // Check to see if on correct boundary for the memory type.
@@ -737,7 +741,7 @@ PeiAllocatePages (
       MemoryType
       );
 
-    // MU_CHANGE START - Save memory allocations for the PEI memory buckets
+    // MU_CHANGE [BEGIN] - Add MemoryBucketLib to MdeModulePkg
     if (IsRuntimeType (MemoryType)) {
       UpdateCurrentBucketTop (*FreeMemoryTop, MemoryType);
 
@@ -757,7 +761,7 @@ PeiAllocatePages (
       InitializeRuntimeMemoryBuckets ();
     }
 
-    // MU_CHANGE END
+    // MU_CHANGE [END] - Add MemoryBucketLib to MdeModulePkg
 
     return EFI_SUCCESS;
   }

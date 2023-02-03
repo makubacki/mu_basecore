@@ -1,10 +1,14 @@
 /**@file
-Library for defining PEI memory buckets. This keeps track of the
-different buckets and the data for the associated HOB.
-This library should not be called by anything outside of the PEI CORE.
+  Library for defining PEI memory buckets. This keeps track of the
+  different buckets and the data needed to populate a HOB passed to
+  DXE.
 
-Copyright (c) Microsoft Corporation.
-SPDX-License-Identifier: BSD-2-Clause-Patent
+  This library should not be called by anything outside of the PEI CORE.
+
+  MU_CHANGE [WHOLE FILE] - Add MemoryBucketLib to MdeModulePkg
+
+  Copyright (c) Microsoft Corporation.
+  SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 
 #include <PiPei.h>
@@ -419,7 +423,7 @@ BuildRuntimeMemoryAllocationInfoHob (
   )
 {
   BuildGuidDataHob (
-    &gMemoryBucketInformationGuid,
+    &gMemoryBucketInformationHobGuid,
     &mRuntimeBucketHob,
     (sizeof (PEI_MEMORY_BUCKET_INFORMATION))
     );
