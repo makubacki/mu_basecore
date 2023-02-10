@@ -1022,7 +1022,7 @@ GetConsoleInCheck (
   IN  BMM_CALLBACK_DATA  *CallbackData
   )
 {
-  UINTN                Index;
+  UINT16               Index;
   BM_MENU_ENTRY        *NewMenuEntry;
   UINT8                *ConInCheck;
   BM_CONSOLE_CONTEXT   *NewConsoleContext;
@@ -1060,7 +1060,7 @@ GetConsoleOutCheck (
   IN  BMM_CALLBACK_DATA  *CallbackData
   )
 {
-  UINTN                Index;
+  UINT16               Index;
   BM_MENU_ENTRY        *NewMenuEntry;
   UINT8                *ConOutCheck;
   BM_CONSOLE_CONTEXT   *NewConsoleContext;
@@ -1097,7 +1097,7 @@ GetConsoleErrCheck (
   IN  BMM_CALLBACK_DATA  *CallbackData
   )
 {
-  UINTN                Index;
+  UINT16               Index;
   BM_MENU_ENTRY        *NewMenuEntry;
   UINT8                *ConErrCheck;
   BM_CONSOLE_CONTEXT   *NewConsoleContext;
@@ -1137,7 +1137,7 @@ GetTerminalAttribute (
   BMM_FAKE_NV_DATA     *CurrentFakeNVMap;
   BM_MENU_ENTRY        *NewMenuEntry;
   BM_TERMINAL_CONTEXT  *NewTerminalContext;
-  UINTN                TerminalIndex;
+  UINT16               TerminalIndex;
   UINT8                AttributeIndex;
 
   ASSERT (CallbackData != NULL);

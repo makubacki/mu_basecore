@@ -539,7 +539,7 @@ UpdateTerminalContent (
   IN BMM_FAKE_NV_DATA  *BmmData
   )
 {
-  UINTN                Index;
+  UINT16               Index;
   BM_TERMINAL_CONTEXT  *NewTerminalContext;
   BM_MENU_ENTRY        *NewMenuEntry;
 
@@ -581,7 +581,7 @@ UpdateConsoleContent (
   IN BMM_FAKE_NV_DATA  *BmmData
   )
 {
-  UINTN                Index;
+  UINT16               Index;
   BM_CONSOLE_CONTEXT   *NewConsoleContext;
   BM_TERMINAL_CONTEXT  *NewTerminalContext;
   BM_MENU_ENTRY        *NewMenuEntry;
@@ -784,7 +784,7 @@ BootMaintRouteConfig (
   BMM_FAKE_NV_DATA                 *OldBmmData;
   BM_MENU_ENTRY                    *NewMenuEntry;
   BM_LOAD_CONTEXT                  *NewLoadContext;
-  UINTN                            Index;
+  UINT16                           Index;
   BOOLEAN                          TerminalAttChange;
   BMM_CALLBACK_DATA                *Private;
   UINTN                            Offset;
@@ -1353,7 +1353,7 @@ DiscardChangeHandler (
   IN  BMM_FAKE_NV_DATA   *CurrentFakeNVMap
   )
 {
-  UINTN  Index;
+  UINT16  Index;
 
   switch (Private->BmmPreviousPageId) {
     case FORM_BOOT_CHG_ID:
@@ -1411,7 +1411,7 @@ CleanUselessBeforeSubmit (
   IN  BMM_CALLBACK_DATA  *Private
   )
 {
-  UINTN  Index;
+  UINT16  Index;
 
   if (Private->BmmPreviousPageId != FORM_BOOT_DEL_ID) {
     for (Index = 0; Index < BootOptionMenu.MenuNumber; Index++) {
@@ -1506,7 +1506,7 @@ InitializeBmmConfig (
 {
   BM_MENU_ENTRY    *NewMenuEntry;
   BM_LOAD_CONTEXT  *NewLoadContext;
-  UINT32           Index;
+  UINT16           Index;
 
   ASSERT (CallbackData != NULL);
 
@@ -1514,7 +1514,7 @@ InitializeBmmConfig (
   // Initialize data which located in BMM main page
   //
   CallbackData->BmmFakeNvData.BootNext = NONE_BOOTNEXT_VALUE;
-  for (Index = 0; (UINTN)Index < BootOptionMenu.MenuNumber; Index++) {
+  for (Index = 0; Index < BootOptionMenu.MenuNumber; Index++) {
     NewMenuEntry   = BOpt_GetMenuEntry (&BootOptionMenu, Index);
     NewLoadContext = (BM_LOAD_CONTEXT *)NewMenuEntry->VariableContext;
 

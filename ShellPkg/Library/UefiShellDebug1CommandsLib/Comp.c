@@ -383,7 +383,7 @@ ShellCommandRunComp (
       }
 
       if (ShellStatus == SHELL_SUCCESS) {
-        while ((UINT64)DiffPointNumber < DifferentCount) {
+        while (DiffPointNumber < DifferentCount) {
           DataSizeFromFile1 = 1;
           DataSizeFromFile2 = 1;
           OneByteFromFile1  = 0;

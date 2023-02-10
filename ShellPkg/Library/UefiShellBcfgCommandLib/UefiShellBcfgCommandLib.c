@@ -1041,7 +1041,7 @@ BcfgAddOpt (
   SHELL_STATUS    ShellStatus;
   EFI_STATUS      Status;
   UINT16          OptionIndex;
-  UINT32          LoopCounter;
+  UINT16          LoopCounter;
   UINT64          Intermediate;
   CONST CHAR16    *Temp;
   CONST CHAR16    *Walker;
