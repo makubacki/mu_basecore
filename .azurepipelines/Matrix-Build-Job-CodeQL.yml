@@ -1,9 +1,8 @@
 ## @file
-# Template file for generating a build job matrix for the packages currently supported for
-# build in Mu Basecore.
+# Template file for generating a build job matrix the includes CodeQL during compilation
+# for the packages currently supported for build in Mu Basecore.
 #
 # Copyright (c) Microsoft Corporation.
-# Copyright (c) 2020 - 2021, ARM Limited. All rights reserved.<BR>
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 ##
 
@@ -45,27 +44,26 @@ jobs:
   # Use matrix to speed up the build process
   strategy:
     matrix:
-      TARGET_MDE_CPU:
-        Build.Pkgs: 'MdePkg,UefiCpuPkg'
-        Build.Targets: 'DEBUG,RELEASE,NO-TARGET,NOOPT'
-      TARGET_MDEMODULE_DEBUG:
-        Build.Pkgs: 'MdeModulePkg'
-        Build.Targets: 'DEBUG,NOOPT'
-      TARGET_MDEMODULE_RELEASE:
-        Build.Pkgs: 'MdeModulePkg'
-        Build.Targets: 'RELEASE,NO-TARGET'
-      TARGET_NETWORK:
-        Build.Pkgs: 'NetworkPkg'
-        Build.Targets: 'DEBUG,RELEASE,NO-TARGET,NOOPT'
-      TARGET_OTHER:
-        Build.Pkgs: 'PcAtChipsetPkg,ShellPkg,StandaloneMmPkg,BaseTools'
-        Build.Targets: 'DEBUG,RELEASE,NO-TARGET,NOOPT'
-      TARGET_TEST_POLICY:
-        Build.Pkgs: 'UnitTestFrameworkPkg,PolicyServicePkg'
-        Build.Targets: 'DEBUG,RELEASE,NO-TARGET,NOOPT'
       TARGET_CRYPTO:
-        Build.Pkgs: 'CryptoPkg'
-        Build.Targets: 'DEBUG,RELEASE,NO-TARGET,NOOPT'
+        Build.Pkg: CryptoPkg
+      TARGET_MDE:
+        Build.Pkg: MdePkg
+      TARGET_MDE_MODULE:
+        Build.Pkg: MdeModulePkg
+      TARGET_NETWORK:
+        Build.Pkg: NetworkPkg
+      TARGET_PCAT_CHIPSET:
+        Build.Pkg: PcAtChipsetPkg
+      TARGET_POLICY_SERVICE:
+        Build.Pkg: PolicyServicePkg
+      TARGET_SHELL:
+        Build.Pkg: ShellPkg
+      TARGET_STANDALONE_MM:
+        Build.Pkg: StandaloneMmPkg
+      TARGET_UEFI_CPU:
+        Build.Pkg: UefiCpuPkg
+      TARGET_UNIT_TEST_FRAMEWORK:
+        Build.Pkg: UnitTestFrameworkPkg
 
   workspace:
     clean: all
@@ -82,18 +80,18 @@ jobs:
       displayName: Add User Local Bin to Path
   - template: Steps/PrGate.yml@mu_devops
     parameters:
-      artifacts_identifier: '$(Build.Pkgs) $(Build.Targets)'
+      artifacts_identifier: '$(Build.Pkg) DEBUG'
       build_archs: ${{ parameters.arch_list }}
-      build_pkgs: $(Build.Pkgs)
-      build_targets: $(Build.Targets)
+      build_pkgs: $(Build.Pkg)
+      build_targets: DEBUG
       do_ci_build: true
       do_ci_setup: false
       do_non_ci_build: false
       do_non_ci_setup: true
       do_pr_eval: true
-      extra_build_args: ${{ parameters.extra_build_args }}
-      extra_update_args: ${{ parameters.extra_update_args }}
+      extra_build_args: '--codeql ${{ parameters.extra_build_args }}'
+      extra_update_args: '--codeql ${{ parameters.extra_update_args }}'
       extra_install_step: ${{ parameters.extra_install_step }}
       tool_chain_tag: ${{ parameters.tool_chain_tag }}
       install_tools: ${{ eq(parameters.container_image, '') }}
-      upload_sarif_to_github: ${{ in(parameters.extra_build_args, '--codeql') }}
+      upload_sarif_to_github: true
