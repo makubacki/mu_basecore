@@ -1142,7 +1142,7 @@ DeleteScriptFileStruct (
   IN SCRIPT_FILE  *Script
   )
 {
-  UINTN  LoopVar;
+  UINT8  LoopVar;
 
   if (Script == NULL) {
     return;
