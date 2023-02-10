@@ -1075,7 +1075,11 @@ LibCreateNewFile (
   NewHandle    = NULL;
   FullFileName = NULL;
 
-  LibGetFileHandleFromDevicePath (gFileExplorerPrivate.RetDevicePath, &FileHandle, &ParentName, &DeviceHandle);
+  Status = LibGetFileHandleFromDevicePath (gFileExplorerPrivate.RetDevicePath, &FileHandle, &ParentName, &DeviceHandle);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
   FullFileName = LibAppendFileName (ParentName, FileName);
   if (FullFileName == NULL) {
     return EFI_OUT_OF_RESOURCES;
