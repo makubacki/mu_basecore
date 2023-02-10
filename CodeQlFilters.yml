@@ -10,6 +10,10 @@
 
 {
   "Filters": [
+    # Fixes have been in UefiDevicePathLib except for the false positives that remain and
+    # are filtered here.
+    "-MdePkg/Library/UefiDevicePathLib/DevicePathFromText.c:SM02311",
+    "-MdePkg/Library/UefiDevicePathLib/DevicePathUtilities.c:SM02311",
     "-MdeModulePkg/Universal/Disk/UdfDxe/FileName.c:cpp/uselesstest",
     "-MdeModulePkg/Universal/EbcDxe/EbcDebugger/EdbSupportString.c:cpp/uselesstest",
     "-MdeModulePkg/Universal/Disk/UdfDxe/FileSystemOperations.c:cpp/uselesstest",
