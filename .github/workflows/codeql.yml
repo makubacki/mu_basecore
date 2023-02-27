@@ -25,6 +25,7 @@ on:
 
 jobs:
   gather_packages:
+    name: Gather Repo Packages
     runs-on: ubuntu-latest
     outputs:
       packages: ${{ steps.generate_matrix.outputs.packages }}
@@ -32,6 +33,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
+      with:
+        python-version: '>=3.11'
 
     - name: Install Python
       uses: actions/setup-python@v4
@@ -78,7 +81,7 @@ jobs:
     - name: Install Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.11'
+        python-version: '>=3.11'
 
     - name: Install/Upgrade pip Modules
       run: pip install -r pip-requirements.txt --upgrade
