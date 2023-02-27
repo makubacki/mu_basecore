@@ -24,9 +24,40 @@ on:
       - '!**.h'
 
 jobs:
+  gather_packages:
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.generate_matrix.outputs.packages }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install Python
+      uses: actions/setup-python@v4
+
+    - name: Generate Package Matrix
+      id: generate_matrix
+      shell: python
+      run: |
+        import os
+        import json
+
+        packages = [d for d in os.listdir() if d.strip().lower().endswith('pkg')]
+
+        # Ensure the package can actually be built
+        for package in packages:
+            if not any(file.endswith('.dsc') for file in os.listdir(package)):
+                packages.remove(package)
+
+        with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+            print(f'packages={json.dumps(packages)}', file=fh)
+
   analyze:
     name: Analyze
     runs-on: windows-2022
+    needs:
+      - gather_packages
     permissions:
       actions: read
       contents: read
@@ -35,17 +66,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [
-          # "CryptoPkg",
-          # "MdeModulePkg",
-          # "MdePkg",
-          # "NetworkPkg",
-          # "PcAtChipsetPkg",
-          # "PolicyServicePkg",
-          # "ShellPkg",
-          # "StandaloneMmPkg",
-          "UefiCpuPkg",
-          "UnitTestFrameworkPkg"]
+        package: ${{ fromJson(needs.gather_packages.outputs.packages) }}
         include:
           - archs: IA32,X64
           - tool_chain_tag: VS2022
