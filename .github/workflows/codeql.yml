@@ -7,6 +7,12 @@
 #       workflow is written only for Windows but could easily be adapted to run on Linux
 #       in the future if needed (e.g. swap out "windows" with agent OS var value, etc.)
 #
+# NOTE: This file is automatically synchronized from Mu DevOps. Update the original file there
+#       instead of the file in this repo.
+#
+# - Mu DevOps Repo: https://github.com/microsoft/mu_devops
+# - File Sync Settings: https://github.com/microsoft/mu_devops/blob/main/.sync/Files.yml
+#
 # Copyright (c) Microsoft Corporation.
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 
@@ -16,7 +22,7 @@ on:
   push:
     branches:
       - release/*
-  pull_request:
+  pull_request_target:
     branches:
       - release/*
     paths-ignore:
