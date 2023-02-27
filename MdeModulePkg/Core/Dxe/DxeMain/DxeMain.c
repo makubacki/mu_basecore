@@ -470,6 +470,9 @@ DxeMain (
   //
   Status = CoreInitializeEventServices ();
   ASSERT_EFI_ERROR (Status);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "CoreInitializeEventServices() - %r\n", Status));
+  }
 
   MemoryProfileInstallProtocol ();
 
