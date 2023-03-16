@@ -19,7 +19,7 @@
   DebugLib|UnitTestFrameworkPkg/Library/Posix/DebugLibPosix/DebugLibPosix.inf
   MemoryAllocationLib|UnitTestFrameworkPkg/Library/Posix/MemoryAllocationLibPosix/MemoryAllocationLibPosix.inf
 
-[BuildOptions]
+[BuildOptions.common.HOST_APPLICATION]
 # MU_CHANGE [BEGIN] - Add build flag to detect when building host-based unit tests
   MSFT:*_*_*_CC_FLAGS  = -D HOST_UNIT_TEST_BUILD=1
   GCC:*_*_*_CC_FLAGS   = -D HOST_UNIT_TEST_BUILD=1

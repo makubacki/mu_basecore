@@ -19,6 +19,10 @@
   BUILD_TARGETS                  = DEBUG|RELEASE|NOOPT
   SKUID_IDENTIFIER               = DEFAULT
 
+[SkuIds]
+  0|DEFAULT              # The entry: 0|DEFAULT is reserved and always required.
+  1|HOST_APPLICATION     # Can use this if needed
+
 !include UnitTestFrameworkPkg/UnitTestFrameworkPkgTarget.dsc.inc
 
 !include MdePkg/MdeLibs.dsc.inc
@@ -32,6 +36,7 @@
   gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress|0xE0000000
 
 [LibraryClasses]
+  BaseMemoryLib|MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf
   SafeIntLib|MdePkg/Library/BaseSafeIntLib/BaseSafeIntLib.inf
   # MU_CHANGE START
   BaseBinSecurityLib|MdePkg/Library/BaseBinSecurityLibNull/BaseBinSecurityLibNull.inf
@@ -198,8 +203,6 @@
   MdePkg/Library/MmUnblockMemoryLib/MmUnblockMemoryLibNull.inf
   MdePkg/Library/TdxLib/TdxLib.inf
 
-
-
 # MS_CHANGE Begin
 !if $(TOOLCHAIN) == VS2017 or $(TOOLCHAIN) == VS2019 or $(TOOLCHAIN) == VS2022
 [Components.IA32]
@@ -215,5 +218,8 @@
   MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsicArmVirt.inf
   MdePkg/Library/BaseStackCheckLib/BaseStackCheckLib.inf
   MdePkg/Library/CompilerIntrinsicsLib/ArmCompilerIntrinsicsLib.inf  #MU_CHANGE - Add moved module
+
+!include UnitTestFrameworkPkg/UnitTestFrameworkPkgHost.dsc.inc
+!include MdePkg/Test/HostTestComponents.dsc.inc
 
 [BuildOptions]
