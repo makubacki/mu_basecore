@@ -26,6 +26,7 @@ on:
     branches:
       - main
       - release/*
+      - remove_pip_cache_from_codeql_pkg_gathering_job
   pull_request_target:
     branches:
       - main
