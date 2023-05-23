@@ -1,3 +1,4 @@
+
 # This workflow automatically drafts new project releases so it is obvious
 # what a current release will look like at any time.
 #
@@ -23,7 +24,7 @@ name: Update Release Draft
 on:
   push:
     branches:
-      - release/202208
+      - test_no_bots_in_release
 
 jobs:
   draft:
