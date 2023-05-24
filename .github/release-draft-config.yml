@@ -91,9 +91,7 @@ exclude-labels:
   - 'type:file-sync'
   - 'type:notes'
   - 'type:question'
+  - 'type:dependabot'
 
 exclude-contributors:
-  - uefibot
-  - app/dependabot
-  - dependabot
-  - dependabot[bot]
+  - 'uefibot'
