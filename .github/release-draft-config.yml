@@ -93,7 +93,7 @@ exclude-labels:
   - 'type:question'
 
 exclude-contributors:
-  - 'uefibot'
-  - 'app/dependabot'
-  - 'dependabot'
-  - 'dependabot[bot]'
+  - uefibot
+  - app/dependabot
+  - dependabot
+  - dependabot[bot]
