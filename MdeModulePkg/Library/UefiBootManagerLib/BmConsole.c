@@ -432,7 +432,12 @@ EfiBootManagerUpdateConsoleVariable (
   EFI_STATUS                Status = EFI_SUCCESS;    // MU_CHANGE
   EFI_DEVICE_PATH_PROTOCOL  *VarConsole;
   EFI_DEVICE_PATH_PROTOCOL  *NewDevicePath;
+  // MU_CHANGE [BEGIN] - Explicitly initialize pointers to NULL
+  EFI_DEVICE_PATH_PROTOCOL  *PreviouslySavedDevicePath;
+  // MU_CHANGE [END] - Explicitly initialize pointers to NULL
   EFI_DEVICE_PATH_PROTOCOL  *TempNewDevicePath;
+
+  DEBUG ((DEBUG_INFO, "[%a] - Entry.\n", __FUNCTION__));
 
   if (ConsoleType >= ARRAY_SIZE (mConVarName)) {
     return EFI_INVALID_PARAMETER;
@@ -446,17 +451,34 @@ EfiBootManagerUpdateConsoleVariable (
     return EFI_UNSUPPORTED;
   }
 
+  // MU_CHANGE [BEGIN] - Explicitly initialize pointers to NULL
+  NewDevicePath = NULL;
+  VarConsole    = NULL;
+  // MU_CHANGE [END] - Explicitly initialize pointers to NULL
+
+  // MU_CHANGE [BEGIN] - Check new device path before save
+  PreviouslySavedDevicePath = NULL;
+  // MU_CHANGE [END] - Check new device path before save
+
   // MU_CHANGE - Initialize variable that might not be updated due to error checking
   TempNewDevicePath = NULL;
 
   //
   // Delete the ExclusiveDevicePath from current default console
   //
-  GetEfiGlobalVariable2 (mConVarName[ConsoleType], (VOID **)&VarConsole, NULL);
-  //
-  // Initialize NewDevicePath
-  //
-  NewDevicePath = VarConsole;
+  // MU_CHANGE [BEGIN] - Backup console UEFI variable value
+  Status = GetEfiGlobalVariable2 (mConVarName[ConsoleType], (VOID **)&VarConsole, NULL);
+  if (!EFI_ERROR (Status)) {
+    //
+    // Initialize NewDevicePath
+    //
+    NewDevicePath = VarConsole;
+    DEBUG ((DEBUG_INFO, "[%a] - Previously saved device path found for %s.\n", __FUNCTION__, mConVarName[ConsoleType]));
+    DEBUG ((DEBUG_INFO, "[%a] - Device Path is %s.\n", __FUNCTION__, ConvertDevicePathToText (NewDevicePath, TRUE, TRUE)));
+    PreviouslySavedDevicePath = DuplicateDevicePath (VarConsole);
+  }
+
+  // MU_CHANGE [BEGIN] - Backup console UEFI variable value
 
   //
   // If ExclusiveDevicePath is even the part of the instance in VarConsole, delete it.
@@ -491,18 +513,43 @@ EfiBootManagerUpdateConsoleVariable (
     }
   }
 
+  DEBUG ((DEBUG_INFO, "[%a] - Final devices paths for %s.\n", __FUNCTION__, mConVarName[ConsoleType]));
   if (NewDevicePath != NULL) {
-    //
-    // Finally, Update the variable of the default console by NewDevicePath
-    //
-    Status = gRT->SetVariable (
-                    mConVarName[ConsoleType],
-                    &gEfiGlobalVariableGuid,
-                    EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS
-                    | ((ConsoleType < ConInDev) ? EFI_VARIABLE_NON_VOLATILE : 0),
-                    GetDevicePathSize (NewDevicePath),
-                    NewDevicePath
-                    );
+    DEBUG ((DEBUG_INFO, "[%a] -   NewDevicePath = %s.\n", __FUNCTION__, ConvertDevicePathToText (NewDevicePath, TRUE, TRUE)));
+    DEBUG ((DEBUG_INFO, "[%a] -   NewDevicePathSize = 0x%x.\n", __FUNCTION__, GetDevicePathSize (NewDevicePath)));
+    DUMP_HEX (DEBUG_INFO, 0, NewDevicePath, GetDevicePathSize (NewDevicePath), "");
+  }
+
+  if (PreviouslySavedDevicePath != NULL) {
+    DEBUG ((DEBUG_INFO, "[%a] -   PreviouslySavedDevicePath = %s.\n", __FUNCTION__, ConvertDevicePathToText (PreviouslySavedDevicePath, TRUE, TRUE)));
+    DEBUG ((DEBUG_INFO, "[%a] -   PreviouslySavedDevicePathSize = 0x%x.\n", __FUNCTION__, GetDevicePathSize (PreviouslySavedDevicePath)));
+    DUMP_HEX (DEBUG_INFO, 0, PreviouslySavedDevicePath, GetDevicePathSize (PreviouslySavedDevicePath), "");
+  }
+
+  if (NewDevicePath != NULL) {
+    // MU_CHANGE [BEGIN] - Skip UEFI variable update if new console device path matches already saved path
+    if ((PreviouslySavedDevicePath != NULL) &&
+        (GetDevicePathSize (NewDevicePath) == GetDevicePathSize (PreviouslySavedDevicePath)) &&
+        (CompareMem (NewDevicePath, PreviouslySavedDevicePath, GetDevicePathSize (NewDevicePath)) == 0))
+    {
+      DEBUG ((DEBUG_INFO, "[%a] - Skipping device path update.\n", __FUNCTION__));
+      Status = EFI_SUCCESS;
+    } else {
+      DEBUG ((DEBUG_INFO, "[%a] - Updating device path UEFI variable.\n", __FUNCTION__));
+      //
+      // Finally, Update the variable of the default console by NewDevicePath
+      //
+      Status = gRT->SetVariable (
+                      mConVarName[ConsoleType],
+                      &gEfiGlobalVariableGuid,
+                      EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS
+                      | ((ConsoleType < ConInDev) ? EFI_VARIABLE_NON_VOLATILE : 0),
+                      GetDevicePathSize (NewDevicePath),
+                      NewDevicePath
+                      );
+    }
+
+    // MU_CHANGE [END] - Skip UEFI variable update if new console device path matches already saved path
   }
 
   if (VarConsole == NewDevicePath) {
@@ -518,6 +565,13 @@ EfiBootManagerUpdateConsoleVariable (
       FreePool (NewDevicePath);
     }
   }
+
+  // MU_CHANGE [BEGIN] - Free backed up console UEFI variable value
+  if (PreviouslySavedDevicePath != NULL) {
+    FreePool (PreviouslySavedDevicePath);
+  }
+
+  // MU_CHANGE [END] - Free backed up console UEFI variable value
 
   return Status;
 }
