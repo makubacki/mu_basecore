@@ -30,11 +30,11 @@ on:
       commitishBranch:
         description: Branch to use when building release notes.
         required: true
-        default: release/202302
+        default: refs/heads/release/202302
         type: choice
         options:
-          - release/202208
-          - release/202302
+          - refs/heads/release/202208
+          - refs/heads/release/202302
 
 jobs:
   draft_auto:
