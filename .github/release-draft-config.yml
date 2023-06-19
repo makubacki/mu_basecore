@@ -20,6 +20,9 @@
 name-template: 'v$RESOLVED_VERSION'
 tag-template: 'v$RESOLVED_VERSION'
 
+commitish: 'v202208'
+filter-by-commitish: true
+
 template: |
   # What's Changed
 
