@@ -272,6 +272,7 @@
 # Another test change
 # Another test change
 # Another test change
+# Another test change
 [Components]
   MdeModulePkg/Application/HelloWorld/HelloWorld.inf
   MdeModulePkg/Application/DumpDynPcd/DumpDynPcd.inf
