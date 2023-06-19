@@ -26,13 +26,6 @@ on:
       - release/202302
 
 jobs:
-  update_config:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Update Config
-        run: |
-          sed -i "s#commitish:.*#commitish: ${{ github.ref }}#g" .github/release-draft-config.yml
-
   draft:
       uses: makubacki/mu_devops/.github/workflows/ReleaseDrafter.yml@add_n-1_release_drafter_support
       secrets: inherit
