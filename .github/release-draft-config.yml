@@ -20,8 +20,9 @@
 name-template: 'v$RESOLVED_VERSION'
 tag-template: 'v$RESOLVED_VERSION'
 
-commitish: 'release/202208'
+commitish: 'refs/heads/release/202208'
 filter-by-commitish: true
+tag-prefix: 'v202208'
 
 template: |
   # What's Changed
