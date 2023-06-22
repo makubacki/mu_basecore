@@ -23,9 +23,9 @@ name: Update Release Draft
 on:
   push:
     branches:
-      - release/202302
+      - release_drafter_fork_test
 
 jobs:
   draft:
-    uses: microsoft/mu_devops/.github/workflows/ReleaseDrafter.yml@v5.0.0
+    uses: makubacki/mu_devops/.github/workflows/ReleaseDrafter.yml@update_branch_logic_for_empty_case_test
     secrets: inherit
