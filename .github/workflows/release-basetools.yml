@@ -13,7 +13,7 @@ on:
       - published
   pull_request:
     branches:
-      - release/**
+      - update_basetools_publish_for_v4_upload
     paths:
       - ".github/workflows/release-basetools.yml"
       - "BaseTools/**"
@@ -99,7 +99,6 @@ jobs:
   publish:
     name: Publish Base Tools
     needs: build
-    if: github.event_name == 'release'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
