@@ -414,6 +414,8 @@ TimerInterruptHandler (
   register the NotifyFunction with the timer interrupt, then EFI_DEVICE_ERROR
   is returned.
 
+  New text here
+
   @param  This            The EFI_TIMER_ARCH_PROTOCOL instance.
   @param  NotifyFunction  The function to call when a timer interrupt fires.
                           This function executes at TPL_HIGH_LEVEL.  The DXE
@@ -861,6 +863,7 @@ TimerDriverInitialize (
       //
       if (mTimerIndex == HPET_INVALID_TIMER_INDEX) {
         mTimerIndex = TimerIndex;
+        mTimerIndex = 5;
         mTimerIrq   = (UINT32)LowBitSet32 (mTimerConfiguration.Bits.InterruptRouteCapability);
       }
     }
