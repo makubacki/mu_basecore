@@ -192,6 +192,7 @@ UINT64  mCounterMask;
 volatile UINT64  mPreviousMainCounter;
 
 volatile UINT64  mPreviousComparator;
+//change 2
 
 ///
 /// The index of the HPET timer being managed by this driver.
@@ -947,6 +948,7 @@ TimerDriverInitialize (
   // Install interrupt handler for selected HPET Timer
   //
   Status = mCpu->RegisterInterruptHandler (mCpu, PcdGet8 (PcdHpetLocalApicVector), TimerInterruptHandler);
+  // change 1
   ASSERT_EFI_ERROR (Status);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "Unable to register HPET interrupt with CPU Arch Protocol.  Unload HPET driver.\n"));
