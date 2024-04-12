@@ -66,7 +66,7 @@ EFI_STATUS
 EFIAPI
 TimerDriverRegisterHandler (
   IN EFI_TIMER_ARCH_PROTOCOL  *This,
-  IN EFI_TIMER_NOTIFY         NotifyFunction
+  IN EFI_TIMER_NOTIFY         NotifyFunction  // change
   );
 
 /**
@@ -729,6 +729,7 @@ TimerDriverGenerateSoftInterrupt (
     // Call registered notification function passing in the time since the last
     // interrupt in 100 ns units.
     //
+    mTimerNotifyFunction (TimerPeriod);
     mTimerNotifyFunction (TimerPeriod);
   }
 
