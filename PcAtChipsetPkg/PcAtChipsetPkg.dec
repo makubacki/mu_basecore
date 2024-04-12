@@ -19,6 +19,8 @@
   PACKAGE_GUID                   = B728689A-52D3-4b8c-AE89-2CE5514CC6DC
   PACKAGE_VERSION                = 0.3
 
+# change one
+
 [Includes]
   Include
 
@@ -48,6 +50,9 @@
   #   FALSE - RTC port registers are in I/O space.<BR>
   # @Prompt RTC port registers use MMIO.
   gPcAtChipsetPkgTokenSpaceGuid.PcdRtcUseMmio|FALSE|BOOLEAN|0x00000021
+
+# change two
+# change three
 
 [PcdsFixedAtBuild, PcdsDynamic, PcdsDynamicEx, PcdsPatchableInModule]
   ## This PCD specifies the base address of the HPET timer.
@@ -163,6 +168,9 @@
   ## RTC Update Timeout Value(microsecond).
   # @Prompt RTC Update Timeout Value.
   gPcAtChipsetPkgTokenSpaceGuid.PcdRealTimeClockUpdateTimeout|100000|UINT32|0x00000020
+
+# change four
+# change five
 
 [PcdsFixedAtBuild]
   ## Defines the UART base address.
