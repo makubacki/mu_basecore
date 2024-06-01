@@ -29,6 +29,7 @@ on:
     branches:
       - main
       - release/*
+      - pin_cpp_codeql_queries
   pull_request:
     branches:
       - main
