@@ -2,7 +2,7 @@
 - description: Project Mu UEFI (C++) queries
 
 - queries: '.'
-  from: codeql/cpp-queries
+  from: codeql/cpp-queries@0.9.3
 
 ##########################################################################################
 # "Core" Queries - Part of Core SDL
@@ -78,6 +78,8 @@
     id: cpp/return-stack-allocated-memory
 - include:
     id: cpp/static-buffer-overflow
+- include:
+    id: cpp/suspicious-pointer-scaling
 - include:
     id: cpp/unsigned-comparison-zero
 
