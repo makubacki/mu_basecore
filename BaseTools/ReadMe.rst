@@ -16,7 +16,7 @@ directory contains tools source.
 Build step to generate the binary tools
 ---------------------------------------
 
-Test text
+Test text - update
 
 Windows/Visual Studio Notes
 ===========================
