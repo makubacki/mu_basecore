@@ -29,6 +29,7 @@ on:
     branches:
       - main
       - release/*
+      - 2311_test_cargo_retry
   pull_request:
     branches:
       - main
