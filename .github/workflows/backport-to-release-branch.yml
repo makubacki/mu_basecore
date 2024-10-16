@@ -3,7 +3,7 @@ name: Backport Commits to Release Branch
 on:
   push:
     branches:
-      - dev/202405
+      - test_dev/202405
 
 jobs:
   backport:
@@ -37,7 +37,7 @@ jobs:
 
           const ref = process.env.GITHUB_REF;
           const sourceBranchName = ref.replace('refs/heads/', '');
-          const targetBranchName = sourceBranchName.replace('dev', 'release');
+          const targetBranchName = sourceBranchName.replace('dev', 'test_release');
 
           const commits = context.payload.commits;
           const commitCount = commits.length;
