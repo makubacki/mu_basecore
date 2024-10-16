@@ -1,0 +1,112 @@
+name: Backport Commits to Release Branch
+
+on:
+  push:
+    branches:
+      - dev/202405
+
+jobs:
+  backport:
+    name: Backport Commits to Release Branch
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Check if Backport is Requested
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const { context } = require('@actions/github');
+          const label = context.payload.pull_request.labels.find(l => l.name === 'type:backport');
+          if (!label) {
+            console.log('Changes are not requested for backport. Exiting.');
+            process.exit(0);
+          }
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Determine Backport Info
+      id: backport_info
+      #run: echo "::set-output name=branch_name::${GITHUB_REF#refs/heads/}"
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const core = require('@actions/core');
+          const { context } = require('@actions/github');
+
+          const ref = process.env.GITHUB_REF;
+          const sourceBranchName = ref.replace('refs/heads/', '');
+          const targetBranchName = sourceBranchName.replace('dev', 'release');
+
+          const commits = context.payload.commits;
+          const commitCount = commits.length;
+
+          const commits = context.payload.commits.map(commit => commit.id);
+          core.setOutput('commits', commits.join(' '));
+
+          console.log(`Source branch name is ${sourceBranchName}`);
+          console.log(`Target branch name is ${targetBranchName}`);
+          console.log(`${commitCount} commits to backport:`);
+
+          commits.forEach(commit => {
+            console.log(`**SHA: ${commit.id}**`);
+            console.log(`  >${commit.message}\n`);
+          });
+
+          core.setOutput('source_branch_name', sourceBranchName);
+          core.setOutput('target_branch_name', targetBranchName);
+          core.setOutput('commits', JSON.stringify(commits));
+          core.setOutput('commit_by_id', commits.map(commit => commit.id).join(' '));
+          core.setOutput('commit_messages', commits.map(commit => `**${commit.message.split('\n')[0]}**\n${commit.message.split('\n').slice(1).join('\n')}\n---`).join('\n')));
+          core.setOutput('commit_count', commitCount);
+
+    - name: Fetch ${{ steps.backport_info.outputs.source_branch_name }} Commits
+      run: |
+        git fetch origin ${{ steps.backport_info.outputs.source_branch_name }}
+        git log main --pretty=format:"%H" -n ${{ steps.backport_info.outputs.commit_count }}
+
+    - name: Checkout a Local ${{ steps.backport_info.outputs.target_branch_name }} Branch
+      run: git checkout -b ${{ steps.backport_info.outputs.target_branch_name }} origin/${{ steps.backport_info.outputs.target_branch_name }}
+
+    - name: Check for Merge Conflicts
+      id: merge_conflicts
+      run: |
+        for commit in ${{ steps.backport_info.outputs.commit_by_id }}; do
+          git cherry-pick $commit || exit 1
+        done
+      continue-on-error: true
+
+    - name: Push to ${{ steps.backport_info.outputs.target_branch_name }} if No Conflicts
+      if: success()
+      run: |
+        git push origin ${{ steps.backport_info.outputs.target_branch_name }}
+
+    - name: Create pull request if conflicts
+      if: failure()
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const core = require('@actions/core');
+          const { context, getOctokit } = require('@actions/github');
+
+          const token = core.getInput('GITHUB_TOKEN');
+          const octokit = getOctokit(token);
+
+          const { owner, repo } = context.repo;
+
+          const commitMessages = core.getOutput('commit_messages');
+          const prBranch = core.getOutput('target_branch_name');
+          const pullRequest = await octokit.pulls.create({
+            owner,
+            repo,
+            title: "Release Branch Manual Merge Conflict Resolution Needed",
+            head: 'conflict-resolution',
+            base: '${prBranch}',
+            body: `The following commits need manual resolution:\n\n${commitMessages}`,
+          });
+
+          console.log(`Pull request created: ${pullRequest.data.html_url}`);
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
