@@ -14,17 +14,34 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Get Associated Pull Request
+      id: get_pr
+      uses: octokit/request-action@v2
+      with:
+        route: GET /repos/:repository/commits/:commit_id/pulls
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      continue-on-error: true
+
     - name: Check if Backport is Requested
       uses: actions/github-script@v7
       with:
         script: |
-          const label = context.payload.pull_request.labels.find(l => l.name === 'type:backport');
+          const prNumber = JSON.parse(process.env.STEP_OUTPUT).number;
+          const { data: pull } = await github.pulls.get({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: prNumber
+          });
+
+          const label = pull.labels.find(l => l.name === 'type:backport');
           if (!label) {
             console.log('Changes are not requested for backport. Exiting.');
             process.exit(0);
           }
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        STEP_OUTPUT: ${{ steps.get_pr.outputs }}
 
     # - name: Determine Backport Info
     #   id: backport_info
