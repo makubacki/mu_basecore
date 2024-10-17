@@ -14,6 +14,41 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Determine Contribution Info
+      id: backport_info
+      #run: echo "::set-output name=branch_name::${GITHUB_REF#refs/heads/}"
+      uses: actions/github-script@v7
+      with:
+        script: |
+          // const core = require('@actions/core');
+          // const { context } = require('@actions/github');
+
+          const ref = process.env.GITHUB_REF;
+          const sourceBranchName = ref.replace('refs/heads/', '');
+          const targetBranchName = sourceBranchName.replace('dev', 'test_release');
+
+          const commits = context.payload.commits;
+          const commitCount = commits.length;
+
+          const commits = context.payload.commits.map(commit => commit.id);
+          core.setOutput('commits', commits.join(' '));
+
+          console.log(`Source branch name is ${sourceBranchName}`);
+          console.log(`Target branch name is ${targetBranchName}`);
+          console.log(`${commitCount} commits to backport:`);
+
+          commits.forEach(commit => {
+            console.log(`**SHA: ${commit.id}**`);
+            console.log(`  >${commit.message}\n`);
+          });
+
+          core.setOutput('source_branch_name', sourceBranchName);
+          core.setOutput('target_branch_name', targetBranchName);
+          core.setOutput('commits', JSON.stringify(commits));
+          core.setOutput('commit_by_id', commits.map(commit => commit.id).join(' '));
+          core.setOutput('commit_messages', commits.map(commit => `**${commit.message.split('\n')[0]}**\n${commit.message.split('\n').slice(1).join('\n')}\n---`).join('\n')));
+          core.setOutput('commit_count', commitCount);
+
     - name: Get Associated Pull Request
       id: get_pr
       uses: octokit/request-action@v2.x
@@ -43,40 +78,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         STEP_OUTPUT: ${{ steps.get_pr.outputs }}
 
-    # - name: Determine Backport Info
-    #   id: backport_info
-    #   #run: echo "::set-output name=branch_name::${GITHUB_REF#refs/heads/}"
-    #   uses: actions/github-script@v7
-    #   with:
-    #     script: |
-    #       const core = require('@actions/core');
-    #       const { context } = require('@actions/github');
-
-    #       const ref = process.env.GITHUB_REF;
-    #       const sourceBranchName = ref.replace('refs/heads/', '');
-    #       const targetBranchName = sourceBranchName.replace('dev', 'test_release');
-
-    #       const commits = context.payload.commits;
-    #       const commitCount = commits.length;
-
-    #       const commits = context.payload.commits.map(commit => commit.id);
-    #       core.setOutput('commits', commits.join(' '));
-
-    #       console.log(`Source branch name is ${sourceBranchName}`);
-    #       console.log(`Target branch name is ${targetBranchName}`);
-    #       console.log(`${commitCount} commits to backport:`);
-
-    #       commits.forEach(commit => {
-    #         console.log(`**SHA: ${commit.id}**`);
-    #         console.log(`  >${commit.message}\n`);
-    #       });
-
-    #       core.setOutput('source_branch_name', sourceBranchName);
-    #       core.setOutput('target_branch_name', targetBranchName);
-    #       core.setOutput('commits', JSON.stringify(commits));
-    #       core.setOutput('commit_by_id', commits.map(commit => commit.id).join(' '));
-    #       core.setOutput('commit_messages', commits.map(commit => `**${commit.message.split('\n')[0]}**\n${commit.message.split('\n').slice(1).join('\n')}\n---`).join('\n')));
-    #       core.setOutput('commit_count', commitCount);
 
     # - name: Fetch ${{ steps.backport_info.outputs.source_branch_name }} Commits
     #   run: |
