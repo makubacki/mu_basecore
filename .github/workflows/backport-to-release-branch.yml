@@ -30,9 +30,6 @@ jobs:
           const commits = context.payload.commits;
           const commitCount = commits.length;
 
-          const commits = context.payload.commits.map(commit => commit.id);
-          core.setOutput('commits', commits.join(' '));
-
           console.log(`Source branch name is ${sourceBranchName}`);
           console.log(`Target branch name is ${targetBranchName}`);
           console.log(`${commitCount} commits to backport:`);
