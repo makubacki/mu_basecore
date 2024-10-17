@@ -12,13 +12,13 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Check if Backport is Requested
-      uses: actions/github-script@v6
+      uses: actions/github-script@v7
       with:
         script: |
-          const { context } = require('@actions/github');
+          # const { context } = require('@actions/github');
           const label = context.payload.pull_request.labels.find(l => l.name === 'type:backport');
           if (!label) {
             console.log('Changes are not requested for backport. Exiting.');
@@ -30,7 +30,7 @@ jobs:
     - name: Determine Backport Info
       id: backport_info
       #run: echo "::set-output name=branch_name::${GITHUB_REF#refs/heads/}"
-      uses: actions/github-script@v6
+      uses: actions/github-script@v7
       with:
         script: |
           const core = require('@actions/core');
@@ -85,7 +85,7 @@ jobs:
 
     - name: Create pull request if conflicts
       if: failure()
-      uses: actions/github-script@v6
+      uses: actions/github-script@v7
       with:
         script: |
           const core = require('@actions/core');
