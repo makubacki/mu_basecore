@@ -16,7 +16,7 @@ jobs:
 
     - name: Get Associated Pull Request
       id: get_pr
-      uses: octokit/request-action@v2
+      uses: octokit/request-action@v2.x
       with:
         route: GET /repos/:repository/commits/:commit_id/pulls
       env:
