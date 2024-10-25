@@ -16,6 +16,8 @@
   PACKAGE_GUID                   = 2171df9b-0d39-45aa-ac37-2de190010d23
   PACKAGE_VERSION                = 0.90
 
+# Test change!
+
 [Includes]
   Include
   Test/Mock/Include
@@ -423,7 +425,7 @@
   #  FASLE - Performance collecting will be disabled in processor trace.<BR>
   # @Prompt Enable performance collecting when processor trace is enabled.
   gUefiCpuPkgTokenSpaceGuid.PcdCpuProcTracePerformanceCollecting|FALSE|BOOLEAN|0x60000020
-  
+
   # MU_CHANGE START Add PCD to make wakeup buffer reserved
   ## Specifies that the wake-up buffer for AP startup should be permanently
   # allocated as reserved.
