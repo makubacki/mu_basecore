@@ -20,6 +20,8 @@
   BUILD_TARGETS                  = DEBUG|RELEASE|NOOPT
   SKUID_IDENTIFIER               = DEFAULT
 
+# Code change in MdeModulePkg
+
 !include MdePkg/MdeLibs.dsc.inc
 
 [LibraryClasses]
