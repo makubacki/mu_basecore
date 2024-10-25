@@ -107,51 +107,82 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Fetch ${{ steps.backport_info.outputs.source_branch_name }} Commits
+    - name: Fetch ${{ steps.backport_info.outputs.source_branch_name }} Commits (Source Branch)
       run: |
         git fetch origin ${{ steps.backport_info.outputs.source_branch_name }}
-        git log main --pretty=format:"%H" -n ${{ steps.backport_info.outputs.commit_count }}
+        git log origin/${{ steps.backport_info.outputs.source_branch_name }} --pretty=format:"%H" -n ${{ steps.backport_info.outputs.commit_count }}
 
-    - name: Checkout a Local ${{ steps.backport_info.outputs.target_branch_name }} Branch
-      run: git checkout -b ${{ steps.backport_info.outputs.target_branch_name }} origin/${{ steps.backport_info.outputs.target_branch_name }}
+    - name: Checkout a Local ${{ steps.backport_info.outputs.target_branch_name }} Branch (Destination Branch)
+      run: |
+        git fetch origin ${{ steps.backport_info.outputs.target_branch_name }}
+        git checkout -b ${{ steps.backport_info.outputs.target_branch_name }} origin/${{ steps.backport_info.outputs.target_branch_name }}
 
     - name: Check for Merge Conflicts
       id: merge_conflicts
       run: |
+        conflict=false
         for commit in ${{ steps.backport_info.outputs.commit_by_id }}; do
-          git cherry-pick $commit || exit 1
+          git cherry-pick $commit || {
+            conflict=true;
+            echo "\nMerge conflict detected for commit $commit!";
+            break;
+          }
         done
+        echo "merge_conflict=$conflict" >> $GITHUB_ENV
       continue-on-error: true
 
-    # - name: Push to ${{ steps.backport_info.outputs.target_branch_name }} if No Conflicts
-    #   if: success()
-    #   run: |
-    #     git push origin ${{ steps.backport_info.outputs.target_branch_name }}
+    - name: Push to ${{ steps.backport_info.outputs.target_branch_name }} if No Conflicts
+      if: env.merge_conflict == 'false'
+      run: |
+        git push origin ${{ steps.backport_info.outputs.target_branch_name }}:${{ steps.backport_info.outputs.target_branch_name }}
 
-    # - name: Create pull request if conflicts
-    #   if: failure()
-    #   uses: actions/github-script@v7
-    #   with:
-    #     script: |
-    #       const core = require('@actions/core');
-    #       const { context, getOctokit } = require('@actions/github');
+    - name: Create pull request if conflicts
+      if: env.merge_conflict == 'true'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          # //const GREEN = "\u001b[32m";
 
-    #       const token = core.getInput('GITHUB_TOKEN');
-    #       const octokit = getOctokit(token);
+          //console.log("Attempting to create a pull request so the conflict can be resolved.\n");
 
-    #       const { owner, repo } = context.repo;
+          # //const { owner, repo } = context.repo;
+          # //const token = process.env.GITHUB_TOKEN;
+          # //const targetBranchName = "${{ steps.backport_info.outputs.target_branch_name }}";
+          # //const commitMessages = "${{ steps.backport_info.outputs.commit_messages }}";
 
-    #       const commitMessages = core.getOutput('commit_messages');
-    #       const prBranch = core.getOutput('target_branch_name');
-    #       const pullRequest = await octokit.pulls.create({
-    #         owner,
-    #         repo,
-    #         title: "Release Branch Manual Merge Conflict Resolution Needed",
-    #         head: 'conflict-resolution',
-    #         base: '${prBranch}',
-    #         body: `The following commits need manual resolution:\n\n${commitMessages}`,
-    #       });
+          # //const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/pulls`, {
+          # //  method: 'POST',
+          # //  headers: {
+          # //    'Authorization': `token ${token}`,
+          # //    'Accept': 'application/vnd.github.v3+json',
+          # //  },
+          # //  body: JSON.stringify({
+          # //    title: "Release Branch Manual Merge Conflict Resolution Needed",
+          # //    head: 'conflict-resolution',
+          # //    base: targetBranchName,
+          # //    body: `The following commits need manual resolution:\n\n${commitMessages}`,
+          # //  }),
+          # //});
 
-    #       console.log(`Pull request created: ${pullRequest.data.html_url}`);
-    #   env:
-    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # //if (!response.ok) {
+          # //  throw new Error(`GitHub API responded with status code ${response.status}`);
+          # //}
+
+          # //const pullRequest = await response.json();
+
+          # //console.log(GREEN + `Pull request created: ${pullRequest.html_url}`);
+
+          # // // const token = core.getInput('GITHUB_TOKEN');
+          # // // const octokit = new github.getOctokit(token);
+          # // // const pullRequest = await octokit.rest.pulls.create({
+          # // //   owner,
+          # // //   repo,
+          # // //   title: "Release Branch Manual Merge Conflict Resolution Needed",
+          # // //   head: 'conflict-resolution',
+          # // //   base: '${{ steps.backport_info.outputs.target_branch_name }}',
+          # // //   body: `The following commits need manual resolution:\n\n${{ steps.backport_info.outputs.commit_messages }}`,
+          # // // });
+
+          # //console.log(`Pull request created: ${pullRequest.data.html_url}`);
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
