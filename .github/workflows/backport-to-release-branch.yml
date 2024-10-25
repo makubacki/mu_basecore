@@ -21,7 +21,7 @@ jobs:
         script: |
           const ref = process.env.GITHUB_REF;
           const sourceBranchName = ref.replace('refs/heads/', '');
-          const targetBranchName = sourceBranchName.replace('dev', 'test_release');
+          const targetBranchName = sourceBranchName.replace('dev', 'release');
 
           const commits = context.payload.commits;
           const commitCount = commits.length;
