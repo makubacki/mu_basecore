@@ -40,6 +40,7 @@ jobs:
 
           core.setOutput('source_branch_name', sourceBranchName);
           core.setOutput('target_branch_name', targetBranchName);
+          core.setOutput('commit_id', commits[0].id);
           core.setOutput('commits', JSON.stringify(commits));
           core.setOutput('commit_by_id', commits.map(commit => commit.id).join(' '));
           core.setOutput('commit_messages', commits.map(commit => `${commit.message.split('\n')[0]}\n${commit.message.split('\n').slice(1).join('\n')}\n---`).join('\n'));
@@ -49,7 +50,7 @@ jobs:
       id: get_pr
       uses: octokit/request-action@v2.x
       with:
-        route: GET /repos/:repository/commits/:commit_id/pulls
+        route: GET /repos/${{ github.repository_owner }}/${{ github.repository }}/commits/${{ steps.backport_info.outputs.commit_id }}/pulls
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       continue-on-error: true
