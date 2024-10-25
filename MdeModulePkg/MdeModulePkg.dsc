@@ -24,6 +24,8 @@
 
 !include MdePkg/MdeLibs.dsc.inc
 
+# Another MdeModulePkg change!
+
 [LibraryClasses]
   #
   # Entry point
