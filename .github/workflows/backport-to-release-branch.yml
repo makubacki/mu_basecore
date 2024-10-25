@@ -42,7 +42,7 @@ jobs:
           core.setOutput('target_branch_name', targetBranchName);
           core.setOutput('commits', JSON.stringify(commits));
           core.setOutput('commit_by_id', commits.map(commit => commit.id).join(' '));
-          // core.setOutput('commit_messages', commits.map(commit => `**${commit.message.split('\n')[0]}**\n${commit.message.split('\n').slice(1).join('\n')}\n---`).join('\n')));
+          core.setOutput('commit_messages', commits.map(commit => `${commit.message.split('\n')[0]}\n${commit.message.split('\n').slice(1).join('\n')}\n---`).join('\n'));
           core.setOutput('commit_count', commitCount);
 
     - name: Get Associated Pull Request
