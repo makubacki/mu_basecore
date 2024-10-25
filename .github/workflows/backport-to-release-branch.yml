@@ -124,7 +124,7 @@ jobs:
         for commit in ${{ steps.backport_info.outputs.commit_by_id }}; do
           git cherry-pick $commit || {
             conflict=true;
-            echo "\nMerge conflict detected for commit $commit!";
+            echo -e "\nMerge conflict detected for commit $commit!";
             break;
           }
         done
