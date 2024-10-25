@@ -141,48 +141,6 @@ jobs:
       uses: actions/github-script@v7
       with:
         script: |
-          # //const GREEN = "\u001b[32m";
-
-          //console.log("Attempting to create a pull request so the conflict can be resolved.\n");
-
-          # //const { owner, repo } = context.repo;
-          # //const token = process.env.GITHUB_TOKEN;
-          # //const targetBranchName = "${{ steps.backport_info.outputs.target_branch_name }}";
-          # //const commitMessages = "${{ steps.backport_info.outputs.commit_messages }}";
-
-          # //const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/pulls`, {
-          # //  method: 'POST',
-          # //  headers: {
-          # //    'Authorization': `token ${token}`,
-          # //    'Accept': 'application/vnd.github.v3+json',
-          # //  },
-          # //  body: JSON.stringify({
-          # //    title: "Release Branch Manual Merge Conflict Resolution Needed",
-          # //    head: 'conflict-resolution',
-          # //    base: targetBranchName,
-          # //    body: `The following commits need manual resolution:\n\n${commitMessages}`,
-          # //  }),
-          # //});
-
-          # //if (!response.ok) {
-          # //  throw new Error(`GitHub API responded with status code ${response.status}`);
-          # //}
-
-          # //const pullRequest = await response.json();
-
-          # //console.log(GREEN + `Pull request created: ${pullRequest.html_url}`);
-
-          # // // const token = core.getInput('GITHUB_TOKEN');
-          # // // const octokit = new github.getOctokit(token);
-          # // // const pullRequest = await octokit.rest.pulls.create({
-          # // //   owner,
-          # // //   repo,
-          # // //   title: "Release Branch Manual Merge Conflict Resolution Needed",
-          # // //   head: 'conflict-resolution',
-          # // //   base: '${{ steps.backport_info.outputs.target_branch_name }}',
-          # // //   body: `The following commits need manual resolution:\n\n${{ steps.backport_info.outputs.commit_messages }}`,
-          # // // });
-
-          # //console.log(`Pull request created: ${pullRequest.data.html_url}`);
+          console.log("Attempting to create a pull request so the conflict can be resolved.\n");
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
