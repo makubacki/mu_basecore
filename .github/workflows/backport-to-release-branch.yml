@@ -19,6 +19,8 @@ jobs:
       uses: actions/github-script@v7
       with:
         script: |
+          const BOLD = "\u001b[1m";
+
           const ref = process.env.GITHUB_REF;
           const sourceBranchName = ref.replace('refs/heads/', '');
           const targetBranchName = sourceBranchName.replace('dev', 'release');
@@ -27,20 +29,21 @@ jobs:
           const commitCount = commits.length;
 
           console.log(`Source branch name is ${sourceBranchName}`);
-          console.log(`Target branch name is ${targetBranchName}`);
-          console.log(`${commitCount} commits to backport:`);
+          console.log(`Target branch name is ${targetBranchName}\n`);
 
-          commits.forEach(commit => {
-            console.log(`**SHA: ${commit.id}**`);
-            console.log(`  >${commit.message}\n`);
+          core.startGroup(`${commitCount} Commit(s) in this Contribution`);
+          commits.forEach((commit, index) => {
+            console.log(BOLD + `Commit #${index + 1}: ${commit.id}`);
+            console.log(`  > ${commit.message}\n`);
           });
+          core.endGroup();
 
-          // core.setOutput('source_branch_name', sourceBranchName);
-          // core.setOutput('target_branch_name', targetBranchName);
-          // core.setOutput('commits', JSON.stringify(commits));
-          // core.setOutput('commit_by_id', commits.map(commit => commit.id).join(' '));
+          core.setOutput('source_branch_name', sourceBranchName);
+          core.setOutput('target_branch_name', targetBranchName);
+          core.setOutput('commits', JSON.stringify(commits));
+          core.setOutput('commit_by_id', commits.map(commit => commit.id).join(' '));
           // core.setOutput('commit_messages', commits.map(commit => `**${commit.message.split('\n')[0]}**\n${commit.message.split('\n').slice(1).join('\n')}\n---`).join('\n')));
-          // core.setOutput('commit_count', commitCount);
+          core.setOutput('commit_count', commitCount);
 
     - name: Get Associated Pull Request
       id: get_pr
