@@ -13,6 +13,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.PUSH_TOKEN }}
 
     - name: Determine Contribution Info
       id: backport_info
@@ -109,6 +111,8 @@ jobs:
 
     - name: Fetch ${{ steps.backport_info.outputs.source_branch_name }} Commits (Source Branch)
       run: |
+        git config --global user.email "mubot@microsoft.com"
+        git config --global user.name "Project Mu Bot"
         git fetch origin ${{ steps.backport_info.outputs.source_branch_name }}
         git log origin/${{ steps.backport_info.outputs.source_branch_name }} --pretty=format:"%H" -n ${{ steps.backport_info.outputs.commit_count }}
 
@@ -124,8 +128,12 @@ jobs:
         for commit in ${{ steps.backport_info.outputs.commit_by_id }}; do
           git cherry-pick $commit || {
             conflict=true;
-            echo -e "\nMerge conflict detected for commit $commit!";
-            break;
+            echo -e "\nMerge conflict detected for commit $commit! Committing it with conflict markers.";
+            original_author=$(git log -1 --pretty=format:'%an <%ae>' $commit)
+            original_date=$(git log -1 --pretty=format:'%ad' --date=iso-strict $commit)
+            original_message=$(git log -1 --pretty=%B $commit)
+            git add -A
+            GIT_COMMITTER_DATE="$original_date" GIT_AUTHOR_DATE="$original_date" git commit --author="$original_author" -m "[CONFLICT] $original_message"
           }
         done
         echo "merge_conflict=$conflict" >> $GITHUB_ENV
@@ -143,13 +151,19 @@ jobs:
         TIMESTAMP=$(date +%Y%m%d%H%M%S)
         branch_name="merge-conflict/${{ steps.backport_info.outputs.target_branch_name }}/$TIMESTAMP"
         echo -e "\nMerge conflict branch name generated: $branch_name"
-        echo "::set-output name=branch_name::$branch_name"
+
+        git push origin refs/remotes/origin/${{ steps.backport_info.outputs.target_branch_name }}:refs/heads/$branch_name
+        git branch -m $branch_name
+        # Temporarily check the commits at the tip of the branch
+        git log -5
+        echo "{branch_name}={$branch_name}" >> $GITHUB_OUTPUT
 
     - name: Create Pull Request (On Merge Conflict)
       if: env.merge_conflict == 'true'
-      uses: peter-evans/create-pull-request@v3
+      uses: peter-evans/create-pull-request@v7
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.PUSH_TOKEN }}
+        committer: "Project Mu Bot <mubot@microsoft.com>"
         base: ${{ steps.backport_info.outputs.target_branch_name }}
         branch: ${{ steps.merge_conflict_branch_info.outputs.branch_name }}
         title: 'Manual Merge Conflict Resolution for ${{ steps.backport_info.outputs.first_commit_id }} Commits into ${{ steps.backport_info.outputs.target_branch_name }}'
@@ -161,12 +175,3 @@ jobs:
           ${{ steps.backport_info.outputs.commit_messages }}
         labels: |
           type:release-branch-merge-conflict
-
-    # - name: Create pull request if conflicts
-    #   if: env.merge_conflict == 'true'
-    #   uses: actions/github-script@v7
-    #   with:
-    #     script: |
-    #       console.log("Attempting to create a pull request so the conflict can be resolved.\n");
-    #   env:
-    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
