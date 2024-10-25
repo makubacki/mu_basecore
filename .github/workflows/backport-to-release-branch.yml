@@ -107,21 +107,21 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    # - name: Fetch ${{ steps.backport_info.outputs.source_branch_name }} Commits
-    #   run: |
-    #     git fetch origin ${{ steps.backport_info.outputs.source_branch_name }}
-    #     git log main --pretty=format:"%H" -n ${{ steps.backport_info.outputs.commit_count }}
+    - name: Fetch ${{ steps.backport_info.outputs.source_branch_name }} Commits
+      run: |
+        git fetch origin ${{ steps.backport_info.outputs.source_branch_name }}
+        git log main --pretty=format:"%H" -n ${{ steps.backport_info.outputs.commit_count }}
 
-    # - name: Checkout a Local ${{ steps.backport_info.outputs.target_branch_name }} Branch
-    #   run: git checkout -b ${{ steps.backport_info.outputs.target_branch_name }} origin/${{ steps.backport_info.outputs.target_branch_name }}
+    - name: Checkout a Local ${{ steps.backport_info.outputs.target_branch_name }} Branch
+      run: git checkout -b ${{ steps.backport_info.outputs.target_branch_name }} origin/${{ steps.backport_info.outputs.target_branch_name }}
 
-    # - name: Check for Merge Conflicts
-    #   id: merge_conflicts
-    #   run: |
-    #     for commit in ${{ steps.backport_info.outputs.commit_by_id }}; do
-    #       git cherry-pick $commit || exit 1
-    #     done
-    #   continue-on-error: true
+    - name: Check for Merge Conflicts
+      id: merge_conflicts
+      run: |
+        for commit in ${{ steps.backport_info.outputs.commit_by_id }}; do
+          git cherry-pick $commit || exit 1
+        done
+      continue-on-error: true
 
     # - name: Push to ${{ steps.backport_info.outputs.target_branch_name }} if No Conflicts
     #   if: success()
