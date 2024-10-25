@@ -152,26 +152,24 @@ jobs:
         branch_name="merge-conflict/${{ steps.backport_info.outputs.target_branch_name }}/$TIMESTAMP"
         echo -e "\nMerge conflict branch name generated: $branch_name"
 
-        git push origin refs/remotes/origin/${{ steps.backport_info.outputs.target_branch_name }}:refs/heads/$branch_name
         git branch -m $branch_name
+        git push origin refs/heads/$branch_name:refs/heads/$branch_name
         # Temporarily check the commits at the tip of the branch
         git log -5
         echo "{branch_name}={$branch_name}" >> $GITHUB_OUTPUT
 
     - name: Create Pull Request (On Merge Conflict)
       if: env.merge_conflict == 'true'
-      uses: peter-evans/create-pull-request@v7
-      with:
-        token: ${{ secrets.PUSH_TOKEN }}
-        committer: "Project Mu Bot <mubot@microsoft.com>"
-        base: ${{ steps.backport_info.outputs.target_branch_name }}
-        branch: ${{ steps.merge_conflict_branch_info.outputs.branch_name }}
-        title: 'Manual Merge Conflict Resolution for ${{ steps.backport_info.outputs.first_commit_id }} Commits into ${{ steps.backport_info.outputs.target_branch_name }}'
-        body: |
-          This pull request is created to resolve the merge conflict that occurred while backporting the commits from ${{ steps.backport_info.outputs.source_branch_name }} to ${{ steps.backport_info.outputs.target_branch_name }}.
+      run: |
+          PR_BRANCH="${{ steps.merge_conflict_branch_info.outputs.branch_name }}"
+          BASE_BRANCH="${{ steps.backport_info.outputs.target_branch_name }}"
+          PR_TITLE="Manual Merge Conflict Resolution for ${{ steps.backport_info.outputs.first_commit_id }} Commits into ${{ steps.backport_info.outputs.target_branch_name }}"
+          PR_BODY="This pull request is created to resolve the merge conflict that occurred while backporting the commits from ${{ steps.backport_info.outputs.source_branch_name }} to ${{ steps.backport_info.outputs.target_branch_name }}."
 
-          **Commits:**
-
-          ${{ steps.backport_info.outputs.commit_messages }}
-        labels: |
-          type:release-branch-merge-conflict
+          # Create the pull request
+          curl -s -X POST https://api.github.com/repos/${{ github.repository }}/pulls \
+          -H "Authorization: token $PUSH_TOKEN" \
+          -H "Content-Type: application/json" \
+          -d "{\"title\":\"$PR_TITLE\",\"body\":\"$PR_BODY\",\"head\":\"$PR_BRANCH\",\"base\":\"$BASE_BRANCH\"}"
+      env:
+        PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
