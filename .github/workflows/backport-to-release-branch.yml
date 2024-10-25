@@ -136,11 +136,37 @@ jobs:
       run: |
         git push origin ${{ steps.backport_info.outputs.target_branch_name }}:${{ steps.backport_info.outputs.target_branch_name }}
 
-    - name: Create pull request if conflicts
+    - name: Generate a Unique PR Branch Name (On Merge Conflict)
       if: env.merge_conflict == 'true'
-      uses: actions/github-script@v7
+      id: merge_conflict_branch_info
+      run: |
+        TIMESTAMP=$(date +%Y%m%d%H%M%S)
+        branch_name="merge-conflict/${{ steps.backport_info.outputs.target_branch_name }}/$TIMESTAMP"
+        echo -e "\nMerge conflict branch name generated: $branch_name"
+        echo "::set-output name=branch_name::$branch_name"
+
+    - name: Create Pull Request (On Merge Conflict)
+      if: env.merge_conflict == 'true'
+      uses: peter-evans/create-pull-request@v3
       with:
-        script: |
-          console.log("Attempting to create a pull request so the conflict can be resolved.\n");
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+        base: ${{ steps.backport_info.outputs.target_branch_name }}
+        branch: ${{ steps.merge_conflict_branch_info.outputs.branch_name }}
+        title: 'Manual Merge Conflict Resolution for ${{ steps.backport_info.outputs.first_commit_id }} Commits into ${{ steps.backport_info.outputs.target_branch_name }}'
+        body: |
+          This pull request is created to resolve the merge conflict that occurred while backporting the commits from ${{ steps.backport_info.outputs.source_branch_name }} to ${{ steps.backport_info.outputs.target_branch_name }}.
+
+          **Commits:**
+
+          ${{ steps.backport_info.outputs.commit_messages }}
+        labels: |
+          type:release-branch-merge-conflict
+
+    # - name: Create pull request if conflicts
+    #   if: env.merge_conflict == 'true'
+    #   uses: actions/github-script@v7
+    #   with:
+    #     script: |
+    #       console.log("Attempting to create a pull request so the conflict can be resolved.\n");
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
