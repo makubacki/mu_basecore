@@ -30,10 +30,10 @@ jobs:
           console.log(`Target branch name is ${targetBranchName}`);
           console.log(`${commitCount} commits to backport:`);
 
-          // commits.forEach(commit => {
-          //   console.log(`**SHA: ${commit.id}**`);
-          //   console.log(`  >${commit.message}\n`);
-          // });
+          commits.forEach(commit => {
+            console.log(`**SHA: ${commit.id}**`);
+            console.log(`  >${commit.message}\n`);
+          });
 
           // core.setOutput('source_branch_name', sourceBranchName);
           // core.setOutput('target_branch_name', targetBranchName);
