@@ -27,6 +27,8 @@
   # LzmaF86
   DEFINE COMPRESSION_TOOL_GUID   = D42AE6BD-1352-4bfb-909A-CA72A6EAE889
 
+# Test change
+
 ################################################################################
 #
 # Library Class section - list of all Library Classes needed by this Platform.
