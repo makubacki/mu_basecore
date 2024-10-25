@@ -132,20 +132,23 @@ jobs:
         conflict=false
 
         for commit in ${{ steps.backport_info.outputs.commit_by_id }}; do
-          git cherry-pick $commit || {
-            if git status | grep -q "The previous cherry-pick is now empty"; then
-              echo "Cherry-pick of $commit resulted in an empty commit. Skipping it."
-              git cherry-pick --skip
-            else
-              conflict=true;
-              echo -e "\nMerge conflict detected for commit $commit! Committing it with conflict markers.";
-              original_author=$(git log -1 --pretty=format:'%an <%ae>' $commit)
-              original_date=$(git log -1 --pretty=format:'%ad' --date=iso-strict $commit)
-              original_message=$(git log -1 --pretty=%B $commit)
-              git add -A
-              GIT_COMMITTER_DATE="$original_date" GIT_AUTHOR_DATE="$original_date" git commit --author="$original_author" -m "[CONFLICT] $original_message"
-            fi
-          }
+          echo -e "\nAttempting to cherry-pick commit $commit"
+          cherry_pick_output=$(git cherry-pick $commit 2>&1)
+
+          if echo "$cherry_pick_output" | grep -q "The previous cherry-pick is now empty"; then
+            echo "Cherry-pick resulted in an empty commit for $commit. Skipping it.";
+            git cherry-pick --skip;
+          elif echo "$cherry_pick_output" | grep -q "Merge conflict in"; then
+            echo "Merge conflict detected for commit $commit! Committing it with conflict markers.";
+            original_author=$(git log -1 --pretty=format:'%an <%ae>' $commit)
+            original_date=$(git log -1 --pretty=format:'%ad' --date=iso-strict $commit)
+            original_message=$(git log -1 --pretty=%B $commit)
+            git add -A
+            GIT_COMMITTER_DATE="$original_date" GIT_AUTHOR_DATE="$original_date" git commit --author="$original_author" -m "[CONFLICT] $original_message"
+            conflict=true;
+          else
+            echo "$commit was cherry-picked successfully.";
+          fi
         done
 
         echo "merge_conflict=$conflict" >> $GITHUB_ENV
