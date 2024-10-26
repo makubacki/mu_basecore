@@ -133,13 +133,18 @@ jobs:
 
         for commit in ${{ steps.backport_info.outputs.commit_by_id }}; do
           git cherry-pick $commit || {
-            conflict=true;
-            echo -e "\nMerge conflict detected for commit $commit! Committing it with conflict markers.";
-            original_author=$(git log -1 --pretty=format:'%an <%ae>' $commit)
-            original_date=$(git log -1 --pretty=format:'%ad' --date=iso-strict $commit)
-            original_message=$(git log -1 --pretty=%B $commit)
-            git add -A
-            GIT_COMMITTER_DATE="$original_date" GIT_AUTHOR_DATE="$original_date" git commit --author="$original_author" -m "[CONFLICT] $original_message"
+            if git status | grep -q "The previous cherry-pick is now empty"; then
+              echo "Cherry-pick of $commit resulted in an empty commit. Skipping it."
+              git cherry-pick --skip
+            else
+              conflict=true;
+              echo -e "\nMerge conflict detected for commit $commit! Committing it with conflict markers.";
+              original_author=$(git log -1 --pretty=format:'%an <%ae>' $commit)
+              original_date=$(git log -1 --pretty=format:'%ad' --date=iso-strict $commit)
+              original_message=$(git log -1 --pretty=%B $commit)
+              git add -A
+              GIT_COMMITTER_DATE="$original_date" GIT_AUTHOR_DATE="$original_date" git commit --author="$original_author" -m "[CONFLICT] $original_message"
+            fi
           }
         done
 
