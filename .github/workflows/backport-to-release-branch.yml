@@ -136,7 +136,6 @@ jobs:
 
           set +e
           cherry_pick_output=$( { git cherry-pick $commit; } 2>&1 )
-          echo "Cherry-pick output: $cherry_pick_output"
           set -e
 
           if echo "$cherry_pick_output" | grep -q "The previous cherry-pick is now empty"; then
