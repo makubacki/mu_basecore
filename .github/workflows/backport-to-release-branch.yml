@@ -123,6 +123,14 @@ jobs:
       id: merge_conflicts
       run: |
         conflict=false
+
+        echo "Dumping info for debug:"
+        git remote -v
+        git branch -vv
+        git status
+        git log -5
+        git config --list
+
         for commit in ${{ steps.backport_info.outputs.commit_by_id }}; do
           git cherry-pick $commit || {
             conflict=true;
