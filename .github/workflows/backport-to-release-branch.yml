@@ -1,3 +1,21 @@
+# This workflow moves commits from a development branch to a release branch.
+#
+# Each commit in the development branch is cherry-picked to the release branch. If a merge conflict occurs, the
+# commit is committed to a new branch with merge markers and then a PR is created into the target branch with those
+# markers. The PR is labeled with "type:release-merge-conflict" to indicate that it needs manual resolution.
+#
+# The PR is expected to fail compilation and status checks of course due to the merge conflict markers. A human should
+# then checkout the PR branch, resolve the conflicts, and push the changes back to the PR branch.
+#
+# This workflow is currently being tested in the Mu Basecore repository. Once it performs well over a reasonable
+# period of time, it will be moved to the Mu DevOps repository for general use and synced to other relevant
+# repositories using a more generalized template to fill in some of the details.
+#
+#
+# Copyright (c) Microsoft Corporation.
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+
 name: Backport Commits to Release Branch
 
 on:
@@ -7,7 +25,7 @@ on:
 
 jobs:
   backport:
-    name: Backport Commits to Release Branch
+    name: Backport Dev Branch Commits to Release Branch
     runs-on: ubuntu-latest
 
     steps:
@@ -66,9 +84,6 @@ jobs:
 
           const prNumber = response.data.length > 0 ? response.data[0].number : null;
 
-          // TEST
-          // const prNumber = "64";
-
           console.log(`Associated Pull Request Number: ${prNumber}\n`);
 
           if (!prNumber) {
@@ -89,8 +104,6 @@ jobs:
             });
           core.endGroup();
 
-          // TEST
-          // const label = pull.labels.find(l => l.name === 'impact:non-functional');
           const label = pull.labels.find(l => l.name === 'type:backport');
           if (!label) {
             console.log(GREEN + "Changes are not requested for backport. Exiting.");
@@ -105,17 +118,11 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Fetch ${{ steps.backport_info.outputs.source_branch_name }} Commits (Source Branch)
+    - name: Checkout a Local ${{ steps.backport_info.outputs.target_branch_name }} Branch (Destination Branch)
       if: steps.backport_check.outputs.backport_needed == 'true'
       run: |
         git config --global user.email "mubot@microsoft.com"
         git config --global user.name "Project Mu Bot"
-        git fetch origin
-        git log origin/${{ steps.backport_info.outputs.source_branch_name }} --pretty=format:"%H" -n ${{ steps.backport_info.outputs.commit_count }}
-
-    - name: Checkout a Local ${{ steps.backport_info.outputs.target_branch_name }} Branch (Destination Branch)
-      if: steps.backport_check.outputs.backport_needed == 'true'
-      run: |
         git checkout -b ${{ steps.backport_info.outputs.target_branch_name }} origin/${{ steps.backport_info.outputs.target_branch_name }}
 
     - name: Check for Merge Conflicts
@@ -123,15 +130,6 @@ jobs:
       id: merge_conflicts
       run: |
         conflict=false
-
-        echo "Dumping info for debug:"
-        git remote -v
-        git branch -vv
-        git status
-        git log -5
-        git config --list
-        echo "First commit is ${{ steps.backport_info.outputs.first_commit_id }}"
-        git show ${{ steps.backport_info.outputs.first_commit_id }}
 
         for commit in ${{ steps.backport_info.outputs.commit_by_id }}; do
           git cherry-pick $commit || {
@@ -144,6 +142,7 @@ jobs:
             GIT_COMMITTER_DATE="$original_date" GIT_AUTHOR_DATE="$original_date" git commit --author="$original_author" -m "[CONFLICT] $original_message"
           }
         done
+
         echo "merge_conflict=$conflict" >> $GITHUB_ENV
       continue-on-error: true
 
@@ -158,12 +157,12 @@ jobs:
       run: |
         TIMESTAMP=$(date +%Y%m%d%H%M%S)
         branch_name="merge-conflict/${{ steps.backport_info.outputs.target_branch_name }}/$TIMESTAMP"
+
         echo -e "\nMerge conflict branch name generated: $branch_name"
 
         git branch -m $branch_name
         git push origin refs/heads/$branch_name:refs/heads/$branch_name
-        # Temporarily check the commits at the tip of the branch
-        git log -5
+
         echo "branch_name=$branch_name" >> $GITHUB_OUTPUT
 
     - name: Create Pull Request (On Merge Conflict)
@@ -179,7 +178,6 @@ jobs:
         echo "PR Branch: $PR_BRANCH"
         echo "Base Branch: $BASE_BRANCH"
 
-        # Create the pull request with the REST API
         curl -s -X POST https://api.github.com/repos/${{ github.repository }}/pulls \
         -H "Authorization: token $PUSH_TOKEN" \
         -H "Content-Type: application/json" \
