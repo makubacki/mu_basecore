@@ -133,8 +133,11 @@ jobs:
 
         for commit in ${{ steps.backport_info.outputs.commit_by_id }}; do
           echo -e "\nAttempting to cherry-pick commit $commit..."
+
+          set +e
           cherry_pick_output=$( { git cherry-pick $commit; } 2>&1 )
           echo "Cherry-pick output: $cherry_pick_output"
+          set -e
 
           if echo "$cherry_pick_output" | grep -q "The previous cherry-pick is now empty"; then
             echo "Cherry-picking $commit resulted in an empty commit. Skipping it.";
