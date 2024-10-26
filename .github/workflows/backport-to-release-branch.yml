@@ -36,7 +36,7 @@ jobs:
           core.startGroup(`${commitCount} Commit(s) in this Contribution`);
           commits.forEach((commit, index) => {
             console.log(BOLD + `Commit #${index + 1}: ${commit.id}`);
-            console.log(`  > ${commit.message}\n`);
+            console.log(`${commit.message}\n`);
           });
           core.endGroup();
 
@@ -109,13 +109,12 @@ jobs:
       run: |
         git config --global user.email "mubot@microsoft.com"
         git config --global user.name "Project Mu Bot"
-        git fetch origin ${{ steps.backport_info.outputs.source_branch_name }}
+        git fetch origin
         git log origin/${{ steps.backport_info.outputs.source_branch_name }} --pretty=format:"%H" -n ${{ steps.backport_info.outputs.commit_count }}
 
     - name: Checkout a Local ${{ steps.backport_info.outputs.target_branch_name }} Branch (Destination Branch)
       if: steps.backport_check.outputs.backport_needed == 'true'
       run: |
-        git fetch origin ${{ steps.backport_info.outputs.target_branch_name }}
         git checkout -b ${{ steps.backport_info.outputs.target_branch_name }} origin/${{ steps.backport_info.outputs.target_branch_name }}
 
     - name: Check for Merge Conflicts
@@ -130,6 +129,8 @@ jobs:
         git status
         git log -5
         git config --list
+        echo "First commit is ${{ steps.backport_info.outputs.first_commit_id }}"
+        git show ${{ steps.backport_info.outputs.first_commit_id }}
 
         for commit in ${{ steps.backport_info.outputs.commit_by_id }}; do
           git cherry-pick $commit || {
