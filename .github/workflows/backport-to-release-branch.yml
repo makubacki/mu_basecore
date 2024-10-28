@@ -41,6 +41,7 @@ jobs:
       with:
         script: |
           const BOLD = "\u001b[1m";
+          const GREEN = "\u001b[32m";
 
           const ref = process.env.GITHUB_REF;
           const sourceBranchName = ref.replace('refs/heads/', '');
@@ -48,6 +49,12 @@ jobs:
 
           const commits = context.payload.commits;
           const commitCount = commits.length;
+
+          if (commits.length === 0) {
+            console.log(GREEN + "No commits found. Exiting workflow.");
+            core.setOutput('backport_needed', 'false');
+            process.exit(0);
+          }
 
           console.log(`Source branch name is ${sourceBranchName}`);
           console.log(`Target branch name is ${targetBranchName}\n`);
@@ -59,6 +66,7 @@ jobs:
           });
           core.endGroup();
 
+          core.setOutput('backport_needed', 'true');
           core.setOutput('source_branch_name', sourceBranchName);
           core.setOutput('target_branch_name', targetBranchName);
           core.setOutput('first_commit_id', commits[0].id);
@@ -72,6 +80,11 @@ jobs:
       uses: actions/github-script@v7
       with:
         script: |
+          if (${{ steps.backport_info.outputs.backport_needed }} === 'false') {
+            core.setOutput('backport_needed', 'false');
+            process.exit(0);
+          }
+
           const BOLD = "\u001b[1m";
           const GREEN = "\u001b[32m";
           const MAGENTA = "\u001b[35m";
@@ -88,7 +101,7 @@ jobs:
 
           if (!prNumber) {
             console.log(GREEN + "No associated pull request found. Nothing to backport! Exiting.");
-            core.setOutput("backport_needed", "false");
+            core.setOutput('backport_needed', 'false');
             process.exit(0);
           }
 
@@ -107,14 +120,14 @@ jobs:
           const label = pull.labels.find(l => l.name === 'type:backport');
           if (!label) {
             console.log(GREEN + "Changes are not requested for backport. Exiting.");
-            core.setOutput("backport_needed", "false");
+            core.setOutput('backport_needed', 'false');
             process.exit(0);
           }
 
           console.log(MAGENTA + "The changes are requested for backport. Proceeding with backport.\n");
 
-          core.setOutput("pr_number", prNumber);
-          core.setOutput("backport_needed", "true");
+          core.setOutput('pr_number', prNumber);
+          core.setOutput('backport_needed', 'true');
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
