@@ -1,16 +1,16 @@
-# This workflow moves commits from a development branch to a release branch.
+# This workflow moves marked commits from a development branch to a release branch.
 #
-# Each commit in the development branch is cherry-picked to the release branch. If a merge conflict occurs, the
-# commit is committed to a new branch with merge markers and then a PR is created into the target branch with those
-# markers. The PR is labeled with "type:release-merge-conflict" to indicate that it needs manual resolution.
+# Each commit in the development branch is cherry-picked to the release branch if the commit originates from a merged
+# PR that is marked for backport. If a merge conflict occurs, the commit is committed to a new branch with merge
+# markers and then a PR is created into the target branch with those markers. The PR is labeled with
+# "type:release-merge-conflict" to indicate that it needs manual resolution.
 #
-# The PR is expected to fail compilation and status checks of course due to the merge conflict markers. A human should
-# then checkout the PR branch, resolve the conflicts, and push the changes back to the PR branch.
+# The PR is expected to fail compilation and status checks (of course) due to the merge conflict markers. A human
+# should then checkout the PR branch, resolve the conflicts, and push the changes back to the PR branch.
 #
 # This workflow is currently being tested in the Mu Basecore repository. Once it performs well over a reasonable
 # period of time, it will be moved to the Mu DevOps repository for general use and synced to other relevant
 # repositories using a more generalized template to fill in some of the details.
-#
 #
 # Copyright (c) Microsoft Corporation.
 # SPDX-License-Identifier: BSD-2-Clause-Patent
@@ -21,7 +21,7 @@ name: Backport Commits to Release Branch
 on:
   push:
     branches:
-      - test_dev/202405
+      - dev/202405
 
 jobs:
   backport:
@@ -33,7 +33,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-        token: ${{ secrets.PUSH_TOKEN }}
+        token: ${{ secrets.CHERRY_PICK_TOKEN }}
 
     - name: Determine Contribution Info
       id: backport_info
@@ -182,7 +182,25 @@ jobs:
         PR_BRANCH="${{ steps.merge_conflict_branch_info.outputs.branch_name }}"
         BASE_BRANCH="${{ steps.backport_info.outputs.target_branch_name }}"
         PR_TITLE="Manual Merge Conflict Resolution for ${{ steps.backport_info.outputs.commit_count }} Commits into ${{ steps.backport_info.outputs.target_branch_name }}"
-        PR_BODY="This pull request is created to resolve the merge conflict that occurred while backporting the commits from ${{ steps.backport_info.outputs.source_branch_name }} to ${{ steps.backport_info.outputs.target_branch_name }}."
+        PR_BODY="This pull request is created to resolve the merge conflict that occurred while backporting the commits
+        from ${{ steps.backport_info.outputs.source_branch_name }} to ${{ steps.backport_info.outputs.target_branch_name }}.
+
+        **Commits in this PR:**
+
+        ${{ steps.backport_info.outputs.commit_messages }}
+
+        **Instructions:**
+
+        1. Checkout this PR branch locally.
+        2. Verify all commits that are being backported are present in the branch.
+        3. Resolve the merge conflict markers in the files.
+        4. Commit the changes.
+        5. Push the changes back to this PR branch.
+
+        **Note:**
+
+        If it is too complicated to use this branch as-is, then simply attempt to merge the same set of commits into
+        the release branch locally, resolve the conflicts, and force push the changes to the PR branch."
 
         echo "PR Title: $PR_TITLE"
         echo "PR Body: $PR_BODY"
@@ -190,8 +208,8 @@ jobs:
         echo "Base Branch: $BASE_BRANCH"
 
         curl -s -X POST https://api.github.com/repos/${{ github.repository }}/pulls \
-        -H "Authorization: token $PUSH_TOKEN" \
+        -H "Authorization: token $CHERRY_PICK_TOKEN" \
         -H "Content-Type: application/json" \
         -d "{\"title\":\"$PR_TITLE\",\"body\":\"$PR_BODY\",\"head\":\"$PR_BRANCH\",\"base\":\"$BASE_BRANCH\",\"labels\":[\"type:release-merge-conflict\"]}"
       env:
-        PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
+        CHERRY_PICK_TOKEN: ${{ secrets.CHERRY_PICK_TOKEN }}
