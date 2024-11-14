@@ -26,14 +26,23 @@ on:
       - dev/202405
 
 jobs:
-  draft:
+  dev_draft:
+    name: Draft Release for Dev Branch
 
     permissions:
       contents: write
       pull-requests: write
 
-    uses: makubacki/mu_devops/.github/workflows/ReleaseDrafter.yml@v12.2.0
+    uses: makubacki/mu_devops/.github/workflows/ReleaseDrafter.yml@test_release_drafter_update_for_release_branches
     secrets: inherit
+
+  release_draft:
+    name: Draft Release for Release Branch
+    needs: dev_draft
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
 
     steps:
       - name: Get Draft Release Details
