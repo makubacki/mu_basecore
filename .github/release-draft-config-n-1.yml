@@ -20,8 +20,10 @@
 name-template: 'v$RESOLVED_VERSION'
 tag-template: 'v$RESOLVED_VERSION'
 
-commitish: refs/heads/release/202311
+commitish: refs/heads/dev/202311
 filter-by-commitish: true
+include-labels: "type:backport"
+latest: false
 
 template: |
   # What's Changed
