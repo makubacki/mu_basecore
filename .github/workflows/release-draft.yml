@@ -26,46 +26,47 @@ on:
       - dev/202405
 
 jobs:
-  dev_draft:
-    name: Draft Releases
+  draft:
 
     permissions:
       contents: write
       pull-requests: write
 
-    uses: makubacki/mu_devops/.github/workflows/ReleaseDrafter.yml@test_release_drafter_update_for_release_branches
+    uses: makubacki/mu_devops/.github/workflows/ReleaseDrafter.yml@v12.2.0
     secrets: inherit
 
-      # steps:
+    steps:
+      - name: Get Draft Release Details
+        id: get-latest-release
+        if: true
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const releases = await github.repos.listReleases({
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+            const latestDraftRelease = releases.data.find(release => release.target_commitish === process.env.SOURCE_BRANCH && release.draft);
+            if (!latestDraftRelease) {
+              throw new Error(`No draft release found for branch ${process.env.SOURCE_BRANCH}`);
+            }
+            console.log(`Latest Release Draft Found: ${latestDraftRelease.name} (${latestDraftRelease.tag_name})\n`);
+            return latestDraftRelease;
+
       # - name: Draft Release for Release Branch
       #   uses: actions/github-script@v7
       #   if: true
       #   with:
       #     script: |
-      #       const newTag = `release-${{ steps.dev_release.outputs.tag_name }}`;
+      #       const latestDraftRelease = ${getLatestRelease.outputs.result};
+      #       const newTag = `release-${latestDraftRelease.tag_name}`;
       #       await github.repos.createRelease({
       #         owner: context.repo.owner,
       #         repo: context.repo.repo,
       #         tag_name: newTag,
       #         target_commitish: process.env.TARGET_BRANCH,
-      #         name: ${{ steps.dev_release.outputs.name }},
-      #         body: ${{ steps.dev_release.outputs.body }},
+      #         name: latestDraftRelease.name,
+      #         body: latestDraftRelease.body,
       #         draft: true,
+      #         prerelease: latestDraftRelease.prerelease
       #       });
-
-      # - name: Get Draft Release Details
-      #   id: get-latest-release
-      #   if: true
-      #   uses: actions/github-script@v7
-      #   with:
-      #     script: |
-      #       const releases = await github.repos.listReleases({
-      #         owner: context.repo.owner,
-      #         repo: context.repo.repo
-      #       });
-      #       const latestDraftRelease = releases.data.find(release => release.target_commitish === process.env.SOURCE_BRANCH && release.draft);
-      #       if (!latestDraftRelease) {
-      #         throw new Error(`No draft release found for branch ${process.env.SOURCE_BRANCH}`);
-      #       }
-      #       console.log(`Latest Release Draft Found: ${latestDraftRelease.name} (${latestDraftRelease.tag_name})\n`);
-      #       return latestDraftRelease;
