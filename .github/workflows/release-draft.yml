@@ -21,9 +21,11 @@
 name: Update Release Draft
 
 on:
-  push:
-    branches:
-      - dev/202405
+  workflow_run:
+    workflows: ["Backport Commits to Release Branch"]
+    branches: [dev/202405]
+    types:
+      - completed
 
 jobs:
   dev_draft:
