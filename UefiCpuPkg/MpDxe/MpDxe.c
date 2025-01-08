@@ -7,9 +7,12 @@
 **/
 
 #include "MpDxe.h"
+#include <Guid/CacheAttributesChangeEvent.h>
+#include <Library/MtrrLib.h>
 
-EFI_HANDLE  mMpServiceHandle    = NULL;
-UINTN       mNumberOfProcessors = 1;
+EFI_HANDLE  mMpServiceHandle            = NULL;
+UINTN       mNumberOfProcessors         = 1;
+EFI_EVENT   mCacheAttributesChangeEvent = NULL;
 
 EFI_MP_SERVICES_PROTOCOL  mMpServicesTemplate = {
   GetNumberOfProcessors,
@@ -20,6 +23,49 @@ EFI_MP_SERVICES_PROTOCOL  mMpServicesTemplate = {
   EnableDisableAP,
   WhoAmI
 };
+
+/**
+  A minimal wrapper function that allows MtrrSetAllMtrrs() to be passed to
+  EFI_MP_SERVICES_PROTOCOL.StartupAllAPs() as Procedure.
+
+  @param[in] Buffer  Pointer to an MTRR_SETTINGS object, to be passed to
+                     MtrrSetAllMtrrs().
+**/
+VOID
+EFIAPI
+SetMtrrsFromBuffer (
+  IN VOID  *Buffer
+  )
+{
+  MtrrSetAllMtrrs (Buffer);
+}
+
+// MU_CHANGE START: Cache Attribute Change Event
+VOID
+EFIAPI
+CacheAttributesChangeCallback (
+  IN EFI_EVENT  Event,
+  IN VOID       *Context
+  )
+{
+  MTRR_SETTINGS  MtrrSettings;
+
+  DEBUG ((DEBUG_INFO, "MpDxe updating MTRRs with APs\n"));
+
+  MtrrGetAllMtrrs (&MtrrSettings);
+
+  MpInitLibStartupAllAPs (
+    SetMtrrsFromBuffer,
+    FALSE,
+    NULL,
+    0,
+    &MtrrSettings,
+    NULL
+    );
+  // we purposefully don't close the event here, because we want to be called for every update
+}
+
+// MU_CHANGE END: Cache Attribute Change Event
 
 /**
   This service retrieves the number of logical processor in the platform
@@ -690,8 +736,24 @@ InitializeMpExceptionStackSwitchHandlers (
   }
 
   if (BufferSize != 0) {
-    Buffer = AllocateRuntimeZeroPool (BufferSize);
-    ASSERT (Buffer != NULL);
+    // we are allocating the buffer that will hold the new GDT and IDT for the APs. These must be allocated below
+    // 4GB as they are installed in protected mode on the APs using 32 bit register moves. If they are above 4GB,
+    // the APs will triple fault because the 32 bit code segment is invalid
+    Buffer = (UINT8 *)BASE_4GB - 1;
+    Status = gBS->AllocatePages (
+                    AllocateMaxAddress,
+                    EfiRuntimeServicesCode,
+                    EFI_SIZE_TO_PAGES (BufferSize),
+                    (EFI_PHYSICAL_ADDRESS *)&Buffer
+                    );
+    if (EFI_ERROR (Status) || (Buffer == NULL)) {
+      DEBUG ((DEBUG_ERROR, "Failed to allocate buffer for InitializeExceptionStackSwitchHandlers Status %r\n", Status));
+      ASSERT (FALSE);
+      goto Exit;
+    }
+
+    ZeroMem (Buffer, BufferSize);
+
     BufferSize = 0;
     for (Index = 0; Index < mNumberOfProcessors; ++Index) {
       if (SwitchStackData[Index].Status == EFI_BUFFER_TOO_SMALL) {
@@ -718,6 +780,7 @@ InitializeMpExceptionStackSwitchHandlers (
     }
   }
 
+Exit:
   FreePool (SwitchStackData);
 }
 
@@ -794,6 +857,23 @@ InitializeMpSupport (
                     );
     ASSERT_EFI_ERROR (Status);
   }
+
+  // MU_CHANGE START: CacheAttributesChange Event
+  // Register for the CacheAttributesChangeEvent
+  Status = gBS->CreateEventEx (
+                  EVT_NOTIFY_SIGNAL,
+                  TPL_CALLBACK,
+                  CacheAttributesChangeCallback,
+                  NULL,
+                  &gCacheAttributesChangeEventGuid,
+                  &mCacheAttributesChangeEvent
+                  );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "Failed to create CacheAttributesChangeEvent\n"));
+    ASSERT_EFI_ERROR (Status);
+  }
+
+  // MU_CHANGE END: CacheAttributesChange Event
 }
 
 // MU_CHANGE End - CodeQL Change - unguardednullreturndereference

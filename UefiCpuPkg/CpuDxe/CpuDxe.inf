@@ -75,6 +75,7 @@
   gEfiSmmBase2ProtocolGuid                      ## SOMETIMES_CONSUMES
   gMemoryProtectionNonstopModeProtocolGuid      ## MU_CHANGE: PRODUCES
   gEdkiiGcdSyncCompleteProtocolGuid             ## MU_CHANGE: PRODUCES
+  gEfiMemoryAttributeProtocolGuid
 
 [Guids]
   gIdleLoopEventGuid                            ## CONSUMES           ## Event

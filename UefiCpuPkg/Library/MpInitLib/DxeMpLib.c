@@ -609,6 +609,7 @@ MpInitChangeApLoopCallback (
   )
 {
   CPU_MP_DATA  *CpuMpData;
+  IA32_DESCRIPTOR  GdtrDesc;
 
   CpuMpData                  = GetCpuMpData ();
   CpuMpData->PmCodeSegment   = GetProtectedModeCS ();
@@ -620,6 +621,10 @@ MpInitChangeApLoopCallback (
     (EFI_PHYSICAL_ADDRESS)(UINTN)mReservedApLoop.Data,
     EFI_PAGES_TO_SIZE (EFI_SIZE_TO_PAGES (CpuMpData->AddressMap.RelocateApLoopFuncSizeAmdSev))
     );
+
+  AsmReadGdtr(&GdtrDesc);
+  DEBUG ((DEBUG_INFO, "GDT Base: 0x%lx, Limit: 0x%x\n", GdtrDesc.Base, GdtrDesc.Limit));
+
   // MU_CHANGE END
   WakeUpAP (CpuMpData, TRUE, 0, RelocateApLoop, NULL, TRUE);
   while (mNumberToFinish > 0) {
