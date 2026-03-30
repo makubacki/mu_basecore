@@ -26,4 +26,5 @@ jobs:
       conclusion: ${{ github.event.workflow_run.conclusion }}
       head-sha: ${{ github.event.workflow_run.head_sha }}
       triggering-run-id: ${{ github.event.workflow_run.id }}
-    secrets: inherit
+    secrets:
+      private-key: ${{ secrets.MU_ACCESS_APP_PRIVATE_KEY }}

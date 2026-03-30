@@ -125,4 +125,5 @@ jobs:
       head-sha: ${{ github.event.workflow_run.head_sha }}
       mu-basecore-ref: ${{ github.event.workflow_run.head_sha }}
       pr-number: ${{ fromJSON(needs.prepare.outputs.pr_number) }}
-    secrets: inherit
+    secrets:
+      private-key: ${{ secrets.MU_ACCESS_APP_PRIVATE_KEY }}
