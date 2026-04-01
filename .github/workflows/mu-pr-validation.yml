@@ -20,8 +20,8 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: read
   actions: read
+  contents: read
   pull-requests: read
 
 jobs:
@@ -122,9 +122,11 @@ jobs:
     uses: microsoft/mu_devops/.github/workflows/MuPrValidation.yml@add_mu_pr_val_workflow_e2e_val
     with:
       app-id: ${{ vars.MU_ACCESS_APP_ID }}
+      caller-ref: ${{ github.event.workflow_run.head_sha }}
+      caller-repo: ${{ github.repository }}
+      caller-repo-name: mu_basecore
       head-sha: ${{ github.event.workflow_run.head_sha }}
-      mu-basecore-ref: ${{ github.event.workflow_run.head_sha }}
-      mu-basecore-repo: ${{ github.repository }}
       pr-number: ${{ fromJSON(needs.prepare.outputs.pr_number) }}
+      submodule-path: MU_BASECORE
     secrets:
       private-key: ${{ secrets.MU_ACCESS_APP_PRIVATE_KEY }}
