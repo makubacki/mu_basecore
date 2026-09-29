@@ -23,7 +23,7 @@ name: Update Release Draft
 on:
   push:
     branches:
-      - release/202511
+      - release/202608
 
 jobs:
   draft:
