@@ -390,17 +390,14 @@ PageTableLibMapInLevel (
       if (RETURN_ERROR (Status)) {
         return Status;
       }
+    }
 
-      // MU_CHANGE Start - Populate base address bits for non present pages
-      OneOfPagingEntry.Pnle.Uint64 = 0;
-      if ((Level != 1) && (Level != 2) && (Level != 3)) {
-        PageTableLibSetPnle (&OneOfPagingEntry.Pnle, &PleBAttribute, &AllOneMask);
-      } else {
-        PageTableLibSetPle (Level, &OneOfPagingEntry, 0, &PleBAttribute, &AllOneMask);
-      }
-
-      // MU_CHANGE End - Populate base address bits for non present pages
-    } else {
+    //
+    // A present parent leaf is split into child leaf entries to preserve the existing mapping.
+    // A non-present parent is split into child leaf entries only when Level can be a leaf.
+    // Otherwise, the child entries are non-leaf entries and are left zeroed.
+    //
+    if ((ParentPagingEntry->Pce.Present == 1) || (Level <= MaxLeafLevel)) {
       PageTableLibSetPle (Level, &OneOfPagingEntry, 0, &PleBAttribute, &AllOneMask);
     }
 
@@ -436,16 +433,15 @@ PageTableLibMapInLevel (
       PagingEntry = (IA32_PAGING_ENTRY *)((UINTN)Buffer + *BufferSize);
       ZeroMem (PagingEntry, SIZE_4KB);
 
-      // MU_CHANGE Start - Populate contents for both present and non-present pages
-      //
-      // Create 512 child-level entries that map to 2M/4K.
-      //
-      for (SubOffset = 0, Index = 0; Index < 512; Index++) {
-        PagingEntry[Index].Uint64 = OneOfPagingEntry.Uint64 + SubOffset;
-        SubOffset                += RegionLength;
+      if ((ParentPagingEntry->Pce.Present == 1) || (Level <= MaxLeafLevel)) {
+        //
+        // Create 512 child-level entries that map to 1G/2M/4K.
+        //
+        for (SubOffset = 0, Index = 0; Index < 512; Index++) {
+          PagingEntry[Index].Uint64 = OneOfPagingEntry.Uint64 + SubOffset;
+          SubOffset                += RegionLength;
+        }
       }
-
-      // MU_CHANGE End - Populate contents for both present and non-present pages
 
       //
       // Set NOP attributes
@@ -530,12 +526,6 @@ PageTableLibMapInLevel (
         // e.g.: Set PDE[0-255].ReadWrite = 0
         //
         for (Index = 0; Index < 512; Index++) {
-          // MU_CHANGE Start - Count the space for non-present pages as well.
-          // if (PagingEntry[Index].Pce.Present == 0) {
-          //   continue;
-          // }
-          // MU_CHANGE End - Count the space for non-present pages as well.
-
           if (IsPle (&PagingEntry[Index], Level)) {
             PageTableLibSetPle (Level, &PagingEntry[Index], 0, &ChildAttribute, &ChildMask);
           } else {
