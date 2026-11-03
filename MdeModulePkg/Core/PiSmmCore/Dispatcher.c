@@ -919,8 +919,6 @@ SmmDispatcher (
       //
       // Cache state of SmmEntryPointRegistered before calling entry point
       //
-      // MU_CHANGE: Decouple Core private and IPL mailbox
-      // PreviousSmmEntryPointRegistered = gSmmCorePrivate->SmmEntryPointRegistered;
       PreviousSmmEntryPointRegistered = gSmmCoreMailbox->SmmEntryPointRegistered;
 
       //
@@ -974,8 +972,6 @@ SmmDispatcher (
         sizeof (DriverEntry->ImageHandle)
         );
 
-      // MU_CHANGE: Decouple Core private and IPL mailbox
-      // if (!PreviousSmmEntryPointRegistered && gSmmCorePrivate->SmmEntryPointRegistered) {
       if (!PreviousSmmEntryPointRegistered && gSmmCoreMailbox->SmmEntryPointRegistered) {
         //
         // Return immediately if the SMM Entry Point was registered by the SMM

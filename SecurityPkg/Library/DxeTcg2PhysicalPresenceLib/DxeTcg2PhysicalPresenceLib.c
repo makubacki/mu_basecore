@@ -30,7 +30,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Guid/Tcg2PhysicalPresenceData.h>
 #include <Library/Tpm2CommandLib.h>
 #include <Library/Tcg2PhysicalPresenceLib.h>
-#include <Library/Tcg2PhysicalPresencePromptLib.h>    // MU_CHANGE
+#include <Library/Tcg2PhysicalPresencePromptLib.h>
 #include <Library/Tcg2PpVendorLib.h>
 
 #define CONFIRM_BUFFER_SIZE  4096
@@ -252,56 +252,6 @@ Tcg2ExecutePhysicalPresence (
   }
 }
 
-// MU_CHANGE [BEGIN] - Move this code out of the business for processing requests.
-#if (0)
-
-/**
-  Read the specified key for user confirmation.
-
-  @param[in]  CautionKey  If true,  F12 is used as confirm key;
-                          If false, F10 is used as confirm key.
-
-  @retval     TRUE        User confirmed the changes by input.
-  @retval     FALSE       User discarded the changes.
-**/
-BOOLEAN
-Tcg2ReadUserKey (
-  IN     BOOLEAN  CautionKey
-  )
-{
-  EFI_STATUS     Status;
-  EFI_INPUT_KEY  Key;
-  UINT16         InputKey;
-
-  InputKey = 0;
-  do {
-    Status = gBS->CheckEvent (gST->ConIn->WaitForKey);
-    if (!EFI_ERROR (Status)) {
-      Status = gST->ConIn->ReadKeyStroke (gST->ConIn, &Key);
-      if (Key.ScanCode == SCAN_ESC) {
-        InputKey = Key.ScanCode;
-      }
-
-      if ((Key.ScanCode == SCAN_F10) && !CautionKey) {
-        InputKey = Key.ScanCode;
-      }
-
-      if ((Key.ScanCode == SCAN_F12) && CautionKey) {
-        InputKey = Key.ScanCode;
-      }
-    }
-  } while (InputKey == 0);
-
-  if (InputKey != SCAN_ESC) {
-    return TRUE;
-  }
-
-  return FALSE;
-}
-
-#endif
-// MU_CHANGE [END]
-
 /**
   Fill Buffer With BootHashAlg.
 
@@ -374,19 +324,13 @@ Tcg2UserConfirm (
   IN      UINT32  TpmPpCommandParameter
   )
 {
-  CHAR16   *ConfirmText;
-  CHAR16   *TmpStr1;
-  CHAR16   *TmpStr2;
-  UINTN    BufSize;
-  BOOLEAN  CautionKey;
-  BOOLEAN  NoPpiInfo;
-  // MU_CHANGE_70401
-  // MU_CHANGE [BEGIN] - Add a boolean to track the results and remove temporary string buffer.
-  // We now hand the full string off to a helper function to display the user confirmation dialog.
-  BOOLEAN  Result;
-  // UINT16                            Index;
-  // CHAR16                            DstStr[81];
-  // MU_CHANGE [END]
+  CHAR16                            *ConfirmText;
+  CHAR16                            *TmpStr1;
+  CHAR16                            *TmpStr2;
+  UINTN                             BufSize;
+  BOOLEAN                           CautionKey;
+  BOOLEAN                           NoPpiInfo;
+  BOOLEAN                           Result;
   CHAR16                            TempBuffer[1024];
   CHAR16                            TempBuffer2[1024];
   EFI_TCG2_PROTOCOL                 *Tcg2Protocol;
@@ -709,14 +653,13 @@ Tcg2UserConfirm (
   BufSize -= StrSize (ConfirmText);
   UnicodeSPrint (ConfirmText + StrLen (ConfirmText), BufSize, TmpStr1, TmpStr2);
 
-  // MU_CHANGE_70401
-  // MU_CHANGE [BEGIN] - We now hand the full string off to a helper function to display the user confirmation dialog.
-  // DstStr[80] = L'\0';
-  // for (Index = 0; Index < StrLen (ConfirmText); Index += 80) {
-  //   StrnCpyS (DstStr, sizeof (DstStr) / sizeof (CHAR16), ConfirmText + Index, sizeof (DstStr) / sizeof (CHAR16) - 1);
-  //   Print (DstStr);
-  // }
-  Result = PromptForUserConfirmation (ConfirmText);     // JBB TODO: Alter EDKII to call out to a vendor function to do this.
+  Status = Tcg2IsPromptReady ();
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "Tcg2IsPromptReady failed w/ Status: %r\n", Status));
+    Result = FALSE;
+  } else {
+    Result = Tcg2PromptForUserConfirmation (ConfirmText, CautionKey);
+  }
 
 Cleanup:
   if (TmpStr1 != NULL) {
@@ -733,13 +676,7 @@ Cleanup:
 
   HiiRemovePackages (mTcg2PpStringPackHandle);
 
-  // if (Tcg2ReadUserKey (CautionKey)) {
-  //   return TRUE;
-  // }
-
-  // return FALSE;
   return Result;
-  // MU_CHANGE [END]
 }
 
 /**
@@ -1087,44 +1024,40 @@ Tcg2PhysicalPresenceLibProcessRequest (
   EFI_STATUS                  Status;
   UINTN                       DataSize;
   EFI_TCG2_PHYSICAL_PRESENCE  TcgPpData;
-  // EDKII_VARIABLE_LOCK_PROTOCOL      *VariableLockProtocol;  // MU_CHANGE
+  // EDKII_VARIABLE_POLICY_PROTOCOL    *VariablePolicyProtocol;  // MU_CHANGE
   EFI_TCG2_PHYSICAL_PRESENCE_FLAGS  PpiFlags;
 
-  // MU_CHANGE_212735
   // MU_CHANGE [BEGIN]
- #if 0
+  // //
+  // // This flags variable controls whether physical presence is required for TPM command.
+  // // It should be protected from malicious software. We set it as read-only variable here.
+  // //
+  // Status = gBS->LocateProtocol (&gEdkiiVariablePolicyProtocolGuid, NULL, (VOID **)&VariablePolicyProtocol);
+  // if (!EFI_ERROR (Status)) {
+  //   Status = RegisterBasicVariablePolicy (
+  //              VariablePolicyProtocol,
+  //              &gEfiTcg2PhysicalPresenceGuid,
+  //              TCG2_PHYSICAL_PRESENCE_FLAGS_VARIABLE,
+  //              VARIABLE_POLICY_NO_MIN_SIZE,
+  //              VARIABLE_POLICY_NO_MAX_SIZE,
+  //              VARIABLE_POLICY_NO_MUST_ATTR,
+  //              VARIABLE_POLICY_NO_CANT_ATTR,
+  //              VARIABLE_POLICY_TYPE_LOCK_NOW
+  //              );
   //
-  // This flags variable controls whether physical presence is required for TPM command.
-  // It should be protected from malicious software. We set it as read-only variable here.
+  //   if (EFI_ERROR (Status)) {
+  //     DEBUG ((DEBUG_ERROR, "[TPM2] Error when lock variable %s, Status = %r\n", TCG2_PHYSICAL_PRESENCE_FLAGS_VARIABLE, Status));
+  //     ASSERT_EFI_ERROR (Status);
+  //   }
+  // }
   //
-  Status = gBS->LocateProtocol (&gEdkiiVariablePolicyProtocolGuid, NULL, (VOID **)&VariablePolicyProtocol);
-  if (!EFI_ERROR (Status)) {
-    Status = RegisterBasicVariablePolicy (
-               VariablePolicyProtocol,
-               &gEfiTcg2PhysicalPresenceGuid,
-               TCG2_PHYSICAL_PRESENCE_FLAGS_VARIABLE,
-               VARIABLE_POLICY_NO_MIN_SIZE,
-               VARIABLE_POLICY_NO_MAX_SIZE,
-               VARIABLE_POLICY_NO_MUST_ATTR,
-               VARIABLE_POLICY_NO_CANT_ATTR,
-               VARIABLE_POLICY_TYPE_LOCK_NOW
-               );
-
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "[TPM2] Error when lock variable %s, Status = %r\n", TCG2_PHYSICAL_PRESENCE_FLAGS_VARIABLE, Status));
-      ASSERT_EFI_ERROR (Status);
-    }
-  }
-
-  //
-  // Check S4 resume
-  //
-  if (GetBootModeHob () == BOOT_ON_S4_RESUME) {
-    DEBUG ((DEBUG_INFO, "S4 Resume, Skip TPM PP process!\n"));
-    return;
-  }
-
- #endif
+  // //
+  // // Check S4 resume
+  // //
+  // if (GetBootModeHob () == BOOT_ON_S4_RESUME) {
+  //   DEBUG ((DEBUG_INFO, "S4 Resume, Skip TPM PP process!\n"));
+  //   return;
+  // }
   // MU_CHANGE [END]
 
   //
@@ -1139,26 +1072,21 @@ Tcg2PhysicalPresenceLibProcessRequest (
                     &PpiFlags
                     );
   if (EFI_ERROR (Status)) {
-    // MU_CHANGE_212735
     // MU_CHANGE [BEGIN]
-
- #if 0
-    PpiFlags.PPFlags = PcdGet32 (PcdTcg2PhysicalPresenceFlags);
-    Status           = gRT->SetVariable (
-                              TCG2_PHYSICAL_PRESENCE_FLAGS_VARIABLE,
-                              &gEfiTcg2PhysicalPresenceGuid,
-                              EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
-                              sizeof (EFI_TCG2_PHYSICAL_PRESENCE_FLAGS),
-                              &PpiFlags
-                              );
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "[TPM2] Set physical presence flag failed, Status = %r\n", Status));
-      return;
-    }
-
-    DEBUG ((DEBUG_INFO, "[TPM2] Initial physical presence flags value is 0x%x\n", PpiFlags.PPFlags));
- #endif
-
+    // PpiFlags.PPFlags = PcdGet32 (PcdTcg2PhysicalPresenceFlags);
+    // Status           = gRT->SetVariable (
+    //                           TCG2_PHYSICAL_PRESENCE_FLAGS_VARIABLE,
+    //                           &gEfiTcg2PhysicalPresenceGuid,
+    //                           EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
+    //                           sizeof (EFI_TCG2_PHYSICAL_PRESENCE_FLAGS),
+    //                           &PpiFlags
+    //                           );
+    // if (EFI_ERROR (Status)) {
+    //   DEBUG ((DEBUG_ERROR, "[TPM2] Set physical presence flag failed, Status = %r\n", Status));
+    //   return;
+    // }
+    //
+    // DEBUG ((DEBUG_INFO, "[TPM2] Initial physical presence flags value is 0x%x\n", PpiFlags.PPFlags));
     return;
     // MU_CHANGE [END]
   }
@@ -1176,25 +1104,19 @@ Tcg2PhysicalPresenceLibProcessRequest (
                     );
   if (EFI_ERROR (Status)) {
     ZeroMem ((VOID *)&TcgPpData, sizeof (TcgPpData));
-    // MU_CHANGE_212735
     // MU_CHANGE [BEGIN]
-
- #if 0
-    DataSize = sizeof (EFI_TCG2_PHYSICAL_PRESENCE);
-    Status   = gRT->SetVariable (
-                      TCG2_PHYSICAL_PRESENCE_VARIABLE,
-                      &gEfiTcg2PhysicalPresenceGuid,
-                      EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
-                      DataSize,
-                      &TcgPpData
-                      );
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "[TPM2] Set physical presence variable failed, Status = %r\n", Status));
-      return;
-    }
-
- #endif
-
+    // DataSize = sizeof (EFI_TCG2_PHYSICAL_PRESENCE);
+    // Status   = gRT->SetVariable (
+    //                   TCG2_PHYSICAL_PRESENCE_VARIABLE,
+    //                   &gEfiTcg2PhysicalPresenceGuid,
+    //                   EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
+    //                   DataSize,
+    //                   &TcgPpData
+    //                   );
+    // if (EFI_ERROR (Status)) {
+    //   DEBUG ((DEBUG_ERROR, "[TPM2] Set physical presence variable failed, Status = %r\n", Status));
+    //   return;
+    // }
     return;
     // MU_CHANGE [END]
   }
